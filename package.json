@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jasonsbarr/simple-parser/issues"
   },
-  "homepage": "https://github.com/jasonsbarr/simple-parser#readme"
+  "homepage": "https://github.com/jasonsbarr/simple-parser#readme",
+  "dependencies": {
+    "@jasonsbarr/lexer": "^0.1.0"
+  }
 }
