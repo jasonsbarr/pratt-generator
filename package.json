@@ -1,6 +1,7 @@
 {
   "name": "simple-parser",
   "version": "1.0.0",
+  "type": "module",
   "description": "A Pratt parser for a simple expression language",
   "main": "index.js",
   "scripts": {
