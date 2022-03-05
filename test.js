@@ -1,6 +1,59 @@
 import { tokenize } from "./src/lexer.js";
 import { createParser } from "./src/parser.js";
 
+const operators = [
+  {
+    id: "NumberLiteral",
+    nToken: "NUMBER",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "Plus",
+    nToken: null,
+    lToken: "PLUS",
+    oToken: null,
+    prec: 30,
+    assoc: "LEFT",
+    affix: "INFIX",
+    arity: "BINARY",
+  },
+  {
+    id: "Mul",
+    nToken: null,
+    lToken: "MUL",
+    oToken: null,
+    prec: 40,
+    assoc: "LEFT",
+    affix: "INFIX",
+    arity: "BINARY",
+  },
+  {
+    id: "UMinus",
+    nToken: "MINUS",
+    lToken: null,
+    oToken: null,
+    prec: 45,
+    assoc: "RIGHT",
+    affix: "PREFIX",
+    arity: "UNARY",
+  },
+  {
+    id: "Parentheses",
+    nToken: "LPAREN",
+    lToken: null,
+    oToken: "RPAREN",
+    prec: 100,
+    assoc: "NONE",
+    affix: "MATCHFIX",
+    arity: "UNARY",
+  },
+];
+
 const symbols = [
   {
     id: "NumberLiteral",
@@ -74,8 +127,26 @@ const symbols = [
     assoc: "RIGHT",
     arity: "BINARY",
   },
+  {
+    id: "LPAREN",
+    type: "Punc",
+    name: "LPAREN",
+    prec: 100,
+    den: "NUD",
+    assoc: "NONE",
+    arity: "UNARY",
+  },
+  {
+    id: "RPAREN",
+    type: "Punc",
+    name: "RPAREN",
+    prec: 0,
+    den: "ODE",
+    assoc: "NONE",
+    arity: "NONE",
+  },
 ];
 
-const parser = createParser(symbols);
+const parser = createParser(operators);
 
 export const parse = (input) => parser(tokenize(input));

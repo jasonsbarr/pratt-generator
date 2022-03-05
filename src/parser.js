@@ -4,30 +4,38 @@ class ParseError extends Error {
   }
 }
 
-export const createParser = (syms, eoiName = "ENDOFINPUT") => {
-  const symbols = {};
+const fail = (name, line, col) => {
+  throw new ParseError(name, line, col);
+};
+
+export const createParser = (operators, eoiName = "ENDOFINPUT") => {
+  const ops = {};
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
+  const nuds = [];
+  const leds = [];
+  const odes = [];
   const nud = {};
   const led = {};
   const ode = {};
-  const setTokenAtts = ({
+  const setOperatorAtts = ({
     id,
-    type,
-    name,
-    den = "NUD",
-    prec = 0,
-    assoc = "NONE",
-    arity = "NULL",
-  }) => ({
-    id,
-    type,
-    name,
-    den,
+    nToken,
+    lToken,
+    oToken,
     prec,
     assoc,
+    affix,
+    arity,
+  }) => ({
+    id,
+    nToken,
+    lToken,
+    oToken,
+    prec,
+    assoc,
+    affix,
     arity,
   });
-  const registerSymbol = (sym) => (symbols[sym.id] = setTokenAtts(sym));
 
   return (tokens) => {
     let pos = 0;
@@ -36,14 +44,31 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
     const peek = () => tokens[pos];
     let token = peek();
 
-    const getPrec = (name, den) => {
-      for (let { name: n, den: d, prec } of Object.values(symbols)) {
-        if (name === n && den === d) {
-          return prec;
+    /**
+     * Get the precedence of an operation. Call like getPrec("MINUS", "lToken")
+     */
+    const getPrec = (token, den) => {
+      for (let op of Object.values(operators)) {
+        if (token === op[den]) {
+          return op.prec;
         }
       }
       return -1;
     };
+    const isNud = (name) => nuds.includes(name);
+    const isLed = (name) => leds.includes(name);
+    const isOde = (name) => odes.includes(name);
+
+    // const isOde = (name) => {
+    //   for (let { name: n, den } of Object.values(symbols)) {
+    //     if (name === n && den === "ODE") {
+    //       return true;
+    //     }
+    //   }
+    //   return false;
+    // };
+
+    const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
 
     const binop = (id, bp) => (left) => {
       const op = symbols[id];
@@ -64,36 +89,93 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
       // token is nonlocal
       let t = token;
       token = next();
-      let left = nud[t.name](t);
 
-      let prec = getPrec(token.name, "LED");
+      if (!isNud(t.name)) {
+        fail(t.name, t.line, t.col);
+      }
+
+      let left = nud[t.name](t);
+      let prec = getPrec(token.name, "lToken");
 
       while (rbp < prec && token.name !== eoiName) {
         t = token;
         token = next();
-        prec = getPrec(token.name, "LED");
+        prec = getPrec(token.name, "lToken");
         left = led[t.name](left);
+
+        if (isOde(token.name)) {
+          left = ode[token.name](left);
+        }
       }
 
       return left;
     };
 
-    for (let s of syms) {
-      registerSymbol(s);
+    const parseToplevel = () => {
+      if (!isValidSymbol(token.name)) {
+        fail(token.name, token.line, token.col);
+      }
 
-      if (s.den === "NUD") {
-        if (s.arity === "NULL") {
-          nud[s.name] = (tok) => tok;
-        } else if (s.arity === "UNARY") {
-          nud[s.name] = unop(s.name, s.prec);
-        }
-      } else if (s.den === "LED") {
-        if (s.arity === "BINARY") {
-          led[s.name] = binop(s.id, s.prec);
-        }
+      return parseExpr(0);
+    };
+    //   {
+    //   id: "Mul",
+    //   nToken: null,
+    //   lToken: "MUL",
+    //   oToken: null,
+    //   prec: 40,
+    //   assoc: "LEFT",
+    //   affix: "INFIX",
+    //   arity: "BINARY",
+    // },
+    for (let op of operators) {
+      ops[op.id] = setOperatorAtts(op);
+
+      if (op.nToken) {
+        nuds.push(op.nToken);
+      }
+
+      if (op.lToken) {
+        leds.push(op.lToken);
+      }
+
+      if (op.oToken) {
+        odes.push(op.oToken);
+      }
+
+      if (op.assoc === "NONE" && op.affix === "NONE" && op.arity === "NONE") {
+        nud[op.nToken] = (expr) => expr;
       }
     }
 
-    return parseExpr(0);
+    // for (let s of syms) {
+    //   registerSymbol(s);
+
+    //   if (s.den === "NUD") {
+    //     if (s.arity === "NULL") {
+    //       nud[s.name] = (tok) => tok;
+    //     } else if (s.arity === "UNARY" && s.assoc !== "NONE") {
+    //       nud[s.name] = unop(s.name, s.prec);
+    //     } else if (s.arity === "UNARY" && s.assoc === "NONE") {
+    //       nud[s.name] = () => {
+    //         let left = parseExpr(0);
+    //         return left;
+    //       };
+    //     }
+    //   } else if (s.den === "LED") {
+    //     if (s.arity === "BINARY") {
+    //       led[s.name] = binop(s.id, s.prec);
+    //     }
+    //   } else if (s.den === "ODE") {
+    //     if (s.arity === "NONE") {
+    //       ode[s.name] = (expr) => {
+    //         token = next();
+    //         return expr;
+    //       };
+    //     }
+    //   }
+    // }
+
+    return parseToplevel();
   };
 };

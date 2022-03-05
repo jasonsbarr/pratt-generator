@@ -8,6 +8,10 @@ const rules = [
   rule("Symbol", "EXP", String.raw`\*\*`),
   rule("Symbol", "MUL", String.raw`\*`),
   rule("Symbol", "DIV", String.raw`/`),
+  rule("Punc", "LPAREN", String.raw`\(`),
+  rule("Punc", "RPAREN", String.raw`\)`),
+  rule("Keyword", "IF", String.raw`if`),
+  rule("Keyword", "ELSE", String.raw`else`),
 ];
 
 const lex = lexer(rules);
