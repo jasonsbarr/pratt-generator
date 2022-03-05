@@ -1,2 +1,3 @@
-# simple-parser
-A Pratt parser for a simple expression language
+# Simple Parser Generator
+
+A Pratt parser generator for simple expression-based languages
