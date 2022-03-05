@@ -178,6 +178,15 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             return { ...expr, right: parseExpr(op.prec) };
           };
         }
+
+        if (op.affix === "MIXFIX") {
+          nud[op.nToken] = () => ({ type: op.id, first: parseExpr(op.prec) });
+          led[op.lToken] = (left) => ({ ...left, middle: parseExpr(op.prec) });
+          ode[op.oToken] = (expr) => {
+            token = next();
+            return { ...expr, right: parseExpr(op.prec) };
+          };
+        }
       }
     }
 

@@ -4,7 +4,7 @@ import { createParser } from "./src/parser.js";
 const rules = [
   rule("WS", "WS", String.raw`\s+`),
   rule("Number", "NUMBER", String.raw`\d+`),
-  rule("String", "STRING", String.raw`"([^"\\].*)"`),
+  rule("String", "STRING", String.raw`"(?:\\.|[^\\"])*"?`),
   rule("True", "TRUE", String.raw`true`),
   rule("False", "FALSE", String.raw`false`),
   rule("Null", "NULL", String.raw`null`),
@@ -17,6 +17,7 @@ const rules = [
   rule("Punc", "RPAREN", String.raw`\)`),
   rule("Keyword", "IF", String.raw`if`),
   rule("Keyword", "ELSE", String.raw`else`),
+  rule("Keyword", "THEN", String.raw`then`),
 ];
 // ([^"\\]\\.)*"
 
@@ -146,6 +147,16 @@ const operators = [
     prec: 5,
     assoc: "LEFT",
     affix: "INFIX",
+    arity: "TERNARY",
+  },
+  {
+    id: "IfThenElse",
+    nToken: "IF",
+    lToken: "THEN",
+    oToken: "ELSE",
+    prec: 5,
+    assoc: "LEFT",
+    affix: "MIXFIX",
     arity: "TERNARY",
   },
 ];
