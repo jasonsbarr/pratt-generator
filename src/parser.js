@@ -160,8 +160,24 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         }
       }
 
-      if (op.affix === "INFIX" && op.arity === "BINARY") {
-        led[op.lToken] = binop(op.lToken, op.prec, op.assoc);
+      if (op.arity === "BINARY") {
+        if (op.affix === "INFIX") {
+          led[op.lToken] = binop(op.lToken, op.prec, op.assoc);
+        }
+      }
+
+      if (op.arity === "TERNARY") {
+        if (op.affix === "INFIX") {
+          led[op.lToken] = (left) => ({
+            type: op.id,
+            left,
+            middle: parseExpr(op.prec),
+          });
+          ode[op.oToken] = (expr) => {
+            token = next();
+            return { ...expr, right: parseExpr(op.prec) };
+          };
+        }
       }
     }
 

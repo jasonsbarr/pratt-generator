@@ -1,12 +1,13 @@
 import { lexer, rule } from "@jasonsbarr/lexer";
 import { createParser } from "./src/parser.js";
 
-import { rule, lexer } from "@jasonsbarr/lexer";
-
 const rules = [
   rule("WS", "WS", String.raw`\s+`),
   rule("Number", "NUMBER", String.raw`\d+`),
-  rule("String", "STRING", String.raw`"([^"\\]\\.)*"`),
+  rule("String", "STRING", String.raw`"([^"\\].*)"`),
+  rule("True", "TRUE", String.raw`true`),
+  rule("False", "FALSE", String.raw`false`),
+  rule("Null", "NULL", String.raw`null`),
   rule("Symbol", "PLUS", String.raw`\+`),
   rule("Symbol", "MINUS", String.raw`-`),
   rule("Symbol", "EXP", String.raw`\*\*`),
@@ -17,12 +18,14 @@ const rules = [
   rule("Keyword", "IF", String.raw`if`),
   rule("Keyword", "ELSE", String.raw`else`),
 ];
+// ([^"\\]\\.)*"
 
 const lex = lexer(rules);
 
 const filterWs = (tokens) => [...tokens].filter((t) => t.type !== "WS");
 
-const tokenize = (input) => filterWs(lex.compile().input(input).tokenize());
+export const tokenize = (input) =>
+  filterWs(lex.compile().input(input).tokenize());
 
 const operators = [
   {
@@ -38,6 +41,36 @@ const operators = [
   {
     id: "StringLiteral",
     nToken: "STRING",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "TrueLiteral",
+    nToken: "TRUE",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "FalseLiteral",
+    nToken: "FALSE",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "NullLiteral",
+    nToken: "NULL",
     lToken: null,
     oToken: null,
     prec: 0,
@@ -104,6 +137,16 @@ const operators = [
     assoc: "NONE",
     affix: "MATCHFIX",
     arity: "UNARY",
+  },
+  {
+    id: "IfElse",
+    nToken: null,
+    lToken: "IF",
+    oToken: "ELSE",
+    prec: 5,
+    assoc: "LEFT",
+    affix: "INFIX",
+    arity: "TERNARY",
   },
 ];
 
