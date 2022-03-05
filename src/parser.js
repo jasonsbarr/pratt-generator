@@ -103,6 +103,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
         if (isOde(token.name)) {
           left = ode[token.name](left);
+          prec = getPrec(token.name, "lToken");
         }
       }
 
@@ -141,12 +142,22 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         odes.push(op.oToken);
       }
 
-      if (op.assoc === "NONE" && op.affix === "NONE" && op.arity === "NONE") {
+      if (op.arity === "NONE") {
         nud[op.nToken] = (expr) => expr;
       }
 
-      if (op.affix === "PREFIX" && op.arity === "UNARY") {
-        nud[op.nToken] = unop(op.nToken, op.prec);
+      if (op.arity === "UNARY") {
+        if (op.affix === "PREFIX") {
+          nud[op.nToken] = unop(op.nToken, op.prec);
+        }
+
+        if (op.affix === "MATCHFIX") {
+          nud[op.nToken] = () => parseExpr(op.prec);
+          ode[op.oToken] = (expr) => {
+            token = next();
+            return expr;
+          };
+        }
       }
 
       if (op.affix === "INFIX" && op.arity === "BINARY") {
