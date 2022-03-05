@@ -28,10 +28,16 @@ export const createParser = (syms) => {
 
     const binop = (name, bp) => (left) => {
       const op = symbols[name];
-      return { left, op, right: parseExpr(bp - assoc[op.assoc]) };
+      return {
+        type: "BinOp",
+        left,
+        op: name,
+        right: parseExpr(bp - assoc[op.assoc]),
+      };
     };
     const unop = (name, bp) => () => ({
-      op: symbols[name],
+      type: "UnOp",
+      op: name,
       expr: parseExpr(bp),
     });
 
@@ -54,7 +60,7 @@ export const createParser = (syms) => {
 
       if (s.den === "NUD") {
         if (s.arity === "NULL") {
-          nud[s.name] = () => s;
+          nud[s.name] = () => peek();
         } else if (s.arity === "UNARY") {
           nud[s.name] = unop(s.name, s.prec);
         }
@@ -64,5 +70,7 @@ export const createParser = (syms) => {
         }
       }
     }
+
+    return parseExpr(0);
   };
 };
