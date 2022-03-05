@@ -18,6 +18,7 @@ const rules = [
   rule("Keyword", "IF", String.raw`if`),
   rule("Keyword", "ELSE", String.raw`else`),
   rule("Keyword", "THEN", String.raw`then`),
+  rule("Punc", "COMMA", String.raw`,`),
 ];
 // ([^"\\]\\.)*"
 
@@ -158,6 +159,16 @@ const operators = [
     assoc: "LEFT",
     affix: "MIXFIX",
     arity: "TERNARY",
+  },
+  {
+    id: "Sequence",
+    nToken: null,
+    lToken: "COMMA",
+    oToken: null,
+    prec: 1,
+    assoc: "LEFT",
+    affix: "INFIX",
+    arity: "VARIABLE",
   },
 ];
 

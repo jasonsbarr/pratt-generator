@@ -171,6 +171,29 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           };
         }
       }
+
+      if (op.arity === "VARIABLE") {
+        // treat lToken as separator
+        led[op.lToken] = (left) => {
+          let exprs;
+
+          if (left.type === op.id) {
+            // is already a delimited sequence
+            exprs = left.exprs;
+          } else {
+            // is a bare expression
+            exprs = [left];
+          }
+
+          if (isNud(token.name)) {
+            while (isNud(token.name)) {
+              exprs.push(parseExpr(op.prec));
+            }
+          }
+
+          return { type: op.id, exprs };
+        };
+      }
     }
 
     return parseToplevel();
