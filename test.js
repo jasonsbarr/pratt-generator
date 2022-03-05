@@ -1,10 +1,43 @@
-import { tokenize } from "./src/lexer.js";
+import { lexer, rule } from "@jasonsbarr/lexer";
 import { createParser } from "./src/parser.js";
+
+import { rule, lexer } from "@jasonsbarr/lexer";
+
+const rules = [
+  rule("WS", "WS", String.raw`\s+`),
+  rule("Number", "NUMBER", String.raw`\d+`),
+  rule("String", "STRING", String.raw`"([^"\\]\\.)*"`),
+  rule("Symbol", "PLUS", String.raw`\+`),
+  rule("Symbol", "MINUS", String.raw`-`),
+  rule("Symbol", "EXP", String.raw`\*\*`),
+  rule("Symbol", "MUL", String.raw`\*`),
+  rule("Symbol", "DIV", String.raw`/`),
+  rule("Punc", "LPAREN", String.raw`\(`),
+  rule("Punc", "RPAREN", String.raw`\)`),
+  rule("Keyword", "IF", String.raw`if`),
+  rule("Keyword", "ELSE", String.raw`else`),
+];
+
+const lex = lexer(rules);
+
+const filterWs = (tokens) => [...tokens].filter((t) => t.type !== "WS");
+
+const tokenize = (input) => filterWs(lex.compile().input(input).tokenize());
 
 const operators = [
   {
     id: "NumberLiteral",
     nToken: "NUMBER",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "StringLiteral",
+    nToken: "STRING",
     lToken: null,
     oToken: null,
     prec: 0,
@@ -23,6 +56,16 @@ const operators = [
     arity: "BINARY",
   },
   {
+    id: "Minus",
+    nToken: null,
+    lToken: "MINUS",
+    oToken: null,
+    prec: 30,
+    assoc: "LEFT",
+    affix: "INFIX",
+    arity: "BINARY",
+  },
+  {
     id: "Mul",
     nToken: null,
     lToken: "MUL",
@@ -31,6 +74,16 @@ const operators = [
     assoc: "LEFT",
     affix: "INFIX",
     arity: "BINARY",
+  },
+  {
+    id: "UPlus",
+    nToken: "PLUS",
+    lToken: null,
+    oToken: null,
+    prec: 45,
+    assoc: "RIGHT",
+    affix: "PREFIX",
+    arity: "UNARY",
   },
   {
     id: "UMinus",
@@ -51,99 +104,6 @@ const operators = [
     assoc: "NONE",
     affix: "MATCHFIX",
     arity: "UNARY",
-  },
-];
-
-const symbols = [
-  {
-    id: "NumberLiteral",
-    type: "Literal",
-    name: "NUMBER",
-    prec: 0,
-    den: "NUD",
-    assoc: "NONE",
-    arity: "NULL",
-  },
-  {
-    id: "PLUS",
-    type: "Symbol",
-    name: "PLUS",
-    prec: 30,
-    den: "LED",
-    assoc: "LEFT",
-    arity: "BINARY",
-  },
-  {
-    id: "UPLUS",
-    type: "Symbol",
-    name: "PLUS",
-    prec: 45,
-    den: "NUD",
-    assoc: "RIGHT",
-    arity: "UNARY",
-  },
-  {
-    id: "MINUS",
-    type: "Symbol",
-    name: "MINUS",
-    prec: 30,
-    den: "LED",
-    assoc: "LEFT",
-    arity: "BINARY",
-  },
-  {
-    id: "UMINUS",
-    type: "Symbol",
-    name: "MINUS",
-    prec: 45,
-    den: "NUD",
-    assoc: "RIGHT",
-    arity: "UNARY",
-  },
-  {
-    id: "MUL",
-    type: "Symbol",
-    name: "MUL",
-    prec: 35,
-    den: "LED",
-    assoc: "LEFT",
-    arity: "BINARY",
-  },
-  {
-    id: "DIV",
-    type: "Symbol",
-    name: "DIV",
-    prec: 35,
-    den: "LED",
-    assoc: "LEFT",
-    arity: "BINARY",
-  },
-  {
-    id: "EXP",
-    type: "Symbol",
-    name: "EXP",
-    prec: 40,
-    den: "LED",
-    assoc: "RIGHT",
-    arity: "BINARY",
-  },
-  {
-    id: "LPAREN",
-    type: "Punc",
-    name: "LPAREN",
-    prec: 100,
-    den: "NUD",
-    assoc: "NONE",
-    arity: "UNARY",
-  },
-  {
-    id: "RPAREN",
-    type: "Punc",
-    name: "RPAREN",
-    prec: 0,
-    den: "ODE",
-    assoc: "NONE",
-    arity: "NONE",
   },
 ];
 
