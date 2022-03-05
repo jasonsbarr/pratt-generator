@@ -74,15 +74,6 @@ const symbols = [
     assoc: "RIGHT",
     arity: "BINARY",
   },
-  {
-    id: "ENDOFINPUT",
-    type: "EndOfInput",
-    name: "ENDOFINPUT",
-    prec: -1,
-    den: "NUD",
-    assoc: "NONE",
-    arity: "NULL",
-  },
 ];
 
 const parser = createParser(symbols);
