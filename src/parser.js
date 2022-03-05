@@ -61,15 +61,15 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
     const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
 
-    const binop = (name, bp, assoc) => (left) => ({
-      type: "Binary Op",
+    const binop = (id, name, bp, assoc) => (left) => ({
+      type: id,
       left,
       op: name,
       right: parseExpr(bp - assoc[assoc]),
     });
 
-    const unop = (name, bp) => () => ({
-      type: "Unary Op",
+    const unop = (id, name, bp) => () => ({
+      type: id,
       op: name,
       expr: parseExpr(bp),
     });
@@ -131,7 +131,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
       if (op.arity === "UNARY") {
         if (op.affix === "PREFIX") {
-          nud[op.nToken] = unop(op.nToken, op.prec);
+          nud[op.nToken] = unop(op.id, op.nToken, op.prec);
         }
 
         if (op.affix === "MATCHFIX") {
@@ -145,7 +145,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
       if (op.arity === "BINARY") {
         if (op.affix === "INFIX") {
-          led[op.lToken] = binop(op.lToken, op.prec, op.assoc);
+          led[op.lToken] = binop(op.id, op.lToken, op.prec, op.assoc);
         }
       }
 
