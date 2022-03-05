@@ -9,6 +9,7 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
   const nud = {};
   const led = {};
+  const ode = {};
   const setTokenAtts = ({
     id,
     type,
@@ -35,6 +36,15 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
     const peek = () => tokens[pos];
     let token = peek();
 
+    const getPrec = (name, den) => {
+      for (let { name: n, den: d, prec } of Object.values(symbols)) {
+        if (name === n && den === d) {
+          return prec;
+        }
+      }
+      return -1;
+    };
+
     const binop = (id, bp) => (left) => {
       const op = symbols[id];
       return {
@@ -52,21 +62,17 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
 
     const parseExpr = (rbp = 0) => {
       // token is nonlocal
-      let left = nud[token.name].func();
+      let t = token;
       token = next();
+      let left = nud[t.name](t);
 
-      let prec = -1;
-
-      if (led[token.name]) {
-        prec = led[token.name].prec;
-      }
+      let prec = getPrec(token.name, "LED");
 
       while (rbp < prec && token.name !== eoiName) {
-        let t = token;
+        t = token;
         token = next();
-        let opts = led[t.name];
-        prec = opts.prec;
-        left = opts.func(left);
+        prec = getPrec(token.name, "LED");
+        left = led[t.name](left);
       }
 
       return left;
@@ -77,13 +83,13 @@ export const createParser = (syms, eoiName = "ENDOFINPUT") => {
 
       if (s.den === "NUD") {
         if (s.arity === "NULL") {
-          nud[s.name] = { prec: s.prec, func: () => peek() };
+          nud[s.name] = (tok) => tok;
         } else if (s.arity === "UNARY") {
-          nud[s.name] = { prec: s.prec, func: unop(s.name, s.prec) };
+          nud[s.name] = unop(s.name, s.prec);
         }
       } else if (s.den === "LED") {
         if (s.arity === "BINARY") {
-          led[s.name] = { prec: s.prec, func: binop(s.id, s.prec) };
+          led[s.name] = binop(s.id, s.prec);
         }
       }
     }
