@@ -70,17 +70,15 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
     const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
 
-    const binop = (id, bp) => (left) => {
-      const op = symbols[id];
-      return {
-        type: "BinOp",
-        left,
-        op: op.name,
-        right: parseExpr(bp - assoc[op.assoc]),
-      };
-    };
+    const binop = (name, bp, assoc) => (left) => ({
+      type: "Binary Op",
+      left,
+      op: name,
+      right: parseExpr(bp - assoc[assoc]),
+    });
+
     const unop = (name, bp) => () => ({
-      type: "UnOp",
+      type: "Unary Op",
       op: name,
       expr: parseExpr(bp),
     });
@@ -97,11 +95,11 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       let left = nud[t.name](t);
       let prec = getPrec(token.name, "lToken");
 
-      while (rbp < prec && token.name !== eoiName) {
+      while (rbp < prec) {
         t = token;
         token = next();
-        prec = getPrec(token.name, "lToken");
         left = led[t.name](left);
+        prec = getPrec(token.name, "lToken");
 
         if (isOde(token.name)) {
           left = ode[token.name](left);
@@ -145,6 +143,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
       if (op.assoc === "NONE" && op.affix === "NONE" && op.arity === "NONE") {
         nud[op.nToken] = (expr) => expr;
+      }
+
+      if (op.affix === "INFIX" && op.arity === "BINARY") {
+        led[op.lToken] = binop(op.lToken, op.prec, op.assoc);
       }
     }
 
