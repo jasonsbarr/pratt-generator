@@ -1,9 +1,16 @@
-export const createParser = (syms) => {
+class ParseError extends Error {
+  constructor(name, line, col) {
+    super(`Unexpected token type ${name} at ${line}:${col}`);
+  }
+}
+
+export const createParser = (syms, eoiName = "ENDOFINPUT") => {
   const symbols = {};
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
   const nud = {};
   const led = {};
   const setTokenAtts = ({
+    id,
     type,
     name,
     den = "NUD",
@@ -11,6 +18,7 @@ export const createParser = (syms) => {
     assoc = "NONE",
     arity = "NULL",
   }) => ({
+    id,
     type,
     name,
     den,
@@ -18,20 +26,21 @@ export const createParser = (syms) => {
     assoc,
     arity,
   });
-  const registerSymbol = (sym) => (symbols[sym.name] = setTokenAtts(sym));
+  const registerSymbol = (sym) => (symbols[sym.id] = setTokenAtts(sym));
 
   return (tokens) => {
     let pos = 0;
 
     const next = () => tokens[++pos];
     const peek = () => tokens[pos];
+    let token = peek();
 
-    const binop = (name, bp) => (left) => {
-      const op = symbols[name];
+    const binop = (id, bp) => (left) => {
+      const op = symbols[id];
       return {
         type: "BinOp",
         left,
-        op: name,
+        op: op.name,
         right: parseExpr(bp - assoc[op.assoc]),
       };
     };
@@ -42,14 +51,22 @@ export const createParser = (syms) => {
     });
 
     const parseExpr = (rbp = 0) => {
-      let token = peek();
-      let left = nud[token.name]();
+      // token is nonlocal
+      let left = nud[token.name].func();
       token = next();
 
-      while (rbp < symbols[token.name].prec) {
+      let prec = -1;
+
+      if (led[token.name]) {
+        prec = led[token.name].prec;
+      }
+
+      while (rbp < prec && token.name !== eoiName) {
         let t = token;
         token = next();
-        left = led[t.name](left);
+        let opts = led[t.name];
+        prec = opts.prec;
+        left = opts.func(left);
       }
 
       return left;
@@ -60,13 +77,13 @@ export const createParser = (syms) => {
 
       if (s.den === "NUD") {
         if (s.arity === "NULL") {
-          nud[s.name] = () => peek();
+          nud[s.name] = { prec: s.prec, func: () => peek() };
         } else if (s.arity === "UNARY") {
-          nud[s.name] = unop(s.name, s.prec);
+          nud[s.name] = { prec: s.prec, func: unop(s.name, s.prec) };
         }
       } else if (s.den === "LED") {
         if (s.arity === "BINARY") {
-          led[s.name] = binop(s.name, s.prec);
+          led[s.name] = { prec: s.prec, func: binop(s.id, s.prec) };
         }
       }
     }

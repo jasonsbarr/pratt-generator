@@ -3,6 +3,7 @@ import { createParser } from "./src/parser.js";
 
 const symbols = [
   {
+    id: "NumberLiteral",
     type: "Literal",
     name: "NUMBER",
     prec: 0,
@@ -11,6 +12,7 @@ const symbols = [
     arity: "NULL",
   },
   {
+    id: "PLUS",
     type: "Symbol",
     name: "PLUS",
     prec: 30,
@@ -19,6 +21,7 @@ const symbols = [
     arity: "BINARY",
   },
   {
+    id: "UPLUS",
     type: "Symbol",
     name: "PLUS",
     prec: 45,
@@ -27,6 +30,7 @@ const symbols = [
     arity: "UNARY",
   },
   {
+    id: "MINUS",
     type: "Symbol",
     name: "MINUS",
     prec: 30,
@@ -35,6 +39,7 @@ const symbols = [
     arity: "BINARY",
   },
   {
+    id: "UMINUS",
     type: "Symbol",
     name: "MINUS",
     prec: 45,
@@ -43,6 +48,7 @@ const symbols = [
     arity: "UNARY",
   },
   {
+    id: "MUL",
     type: "Symbol",
     name: "MUL",
     prec: 35,
@@ -51,6 +57,7 @@ const symbols = [
     arity: "BINARY",
   },
   {
+    id: "DIV",
     type: "Symbol",
     name: "DIV",
     prec: 35,
@@ -59,6 +66,7 @@ const symbols = [
     arity: "BINARY",
   },
   {
+    id: "EXP",
     type: "Symbol",
     name: "EXP",
     prec: 40,
@@ -67,6 +75,7 @@ const symbols = [
     arity: "BINARY",
   },
   {
+    id: "ENDOFINPUT",
     type: "EndOfInput",
     name: "ENDOFINPUT",
     prec: -1,
