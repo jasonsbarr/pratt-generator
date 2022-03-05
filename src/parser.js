@@ -145,6 +145,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         nud[op.nToken] = (expr) => expr;
       }
 
+      if (op.affix === "PREFIX" && op.arity === "UNARY") {
+        nud[op.nToken] = unop(op.nToken, op.prec);
+      }
+
       if (op.affix === "INFIX" && op.arity === "BINARY") {
         led[op.lToken] = binop(op.lToken, op.prec, op.assoc);
       }
