@@ -8,6 +8,7 @@ const rules = [
   rule("True", "TRUE", String.raw`true`),
   rule("False", "FALSE", String.raw`false`),
   rule("Null", "NULL", String.raw`null`),
+  rule("Symbol", "INC", String.raw`\+\+`),
   rule("Symbol", "PLUS", String.raw`\+`),
   rule("Symbol", "MINUS", String.raw`-`),
   rule("Symbol", "EXP", String.raw`\*\*`),
@@ -19,6 +20,8 @@ const rules = [
   rule("Keyword", "ELSE", String.raw`else`),
   rule("Keyword", "THEN", String.raw`then`),
   rule("Punc", "COMMA", String.raw`,`),
+  rule("Symbol", "ASSIGN", String.raw`=`),
+  rule("Symbol", "IDENT", String.raw`[a-zA-Z_][\w]*`),
 ];
 // ([^"\\]\\.)*"
 
@@ -73,6 +76,16 @@ const operators = [
   {
     id: "NullLiteral",
     nToken: "NULL",
+    lToken: null,
+    oToken: null,
+    prec: 0,
+    assoc: "NONE",
+    affix: "NONE",
+    arity: "NONE",
+  },
+  {
+    id: "Identifier",
+    nToken: "IDENT",
     lToken: null,
     oToken: null,
     prec: 0,
@@ -169,6 +182,26 @@ const operators = [
     assoc: "LEFT",
     affix: "INFIX",
     arity: "VARIABLE",
+  },
+  {
+    id: "Assignment",
+    nToken: null,
+    lToken: "ASSIGN",
+    oToken: null,
+    prec: 3,
+    assoc: "RIGHT",
+    affix: "INFIX",
+    arity: "BINARY",
+  },
+  {
+    id: "Increment",
+    nToken: null,
+    lToken: "INC",
+    oToken: null,
+    prec: 50,
+    assoc: "LEFT",
+    affix: "POSTFIX",
+    arity: "UNARY",
   },
 ];
 
