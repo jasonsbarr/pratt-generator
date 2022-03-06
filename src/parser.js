@@ -121,6 +121,17 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return parseExpression();
     };
 
+    const parseDelimited = (delimiter, left) => {
+      let exprs = [left];
+      exprs.push(parseAtom());
+      while (token.name === delimiter) {
+        token = next();
+        exprs.push(parseAtom());
+      }
+
+      return exprs;
+    };
+
     // generate parser
     for (let op of operators) {
       ops[op.id] = setOperatorAtts(op);
@@ -167,6 +178,29 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             op.assoc,
             op.id.toLowerCase().includes("assignment") ? op.id : "Binary Op"
           );
+        }
+
+        if (op.affix === "MIXFIX") {
+          if (op.nToken) {
+            nud[op.nToken] = () => ({
+              type: op.id,
+              first: parseExpr(op.prec),
+            });
+          }
+
+          if (op.lToken) {
+            led[op.lToken] = (left) => ({
+              ...left,
+              second: parseExpr(op.prec),
+            });
+          }
+
+          if (op.oToken) {
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return expr;
+            };
+          }
         }
       }
 

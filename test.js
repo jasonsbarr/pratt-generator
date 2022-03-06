@@ -8,6 +8,8 @@ const rules = [
   rule("True", "TRUE", String.raw`true`),
   rule("False", "FALSE", String.raw`false`),
   rule("Null", "NULL", String.raw`null`),
+  rule("Keyword", "LAM", String.raw`lam`),
+  rule("Symbol", "ARROW", String.raw`->`),
   rule("Symbol", "INC", String.raw`\+\+`),
   rule("Symbol", "PLUS", String.raw`\+`),
   rule("Symbol", "MINUS", String.raw`-`),
@@ -212,6 +214,16 @@ const operators = [
     assoc: "LEFT",
     affix: "POSTFIX",
     arity: "UNARY",
+  },
+  {
+    id: "Lambda",
+    nToken: "LAM",
+    lToken: "ARROW",
+    oToken: null,
+    prec: 5,
+    assoc: "RIGHT",
+    affix: "MIXFIX",
+    arity: "BINARY",
   },
 ];
 
