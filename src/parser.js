@@ -12,6 +12,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
   const ops = {};
   const seqOps = [];
   const terms = [];
+  const assigns = [];
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
   const nuds = [];
   const leds = [];
@@ -115,6 +116,18 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return left;
     };
 
+    const parseAssign = (left) => {
+      let t = token;
+      token = next();
+
+      return {
+        type: "Assign",
+        op: t.name,
+        left,
+        right: parseExpression(),
+      };
+    };
+
     const parseExpression = (bp = 0) => {
       let exp = parseExpr(bp);
 
@@ -129,6 +142,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         if (isOde(token.name)) {
           exp = parseOde(exp);
         }
+      }
+
+      if (assigns.includes(token.name)) {
+        exp = parseAssign(exp);
       }
 
       return exp;
@@ -288,6 +305,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
       if (op.type === "terminator") {
         terms.push(op.name);
+      }
+
+      if (op.type === "assign") {
+        assigns.push(op.name);
       }
     }
 

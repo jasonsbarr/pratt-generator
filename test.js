@@ -212,17 +212,6 @@ const operators = [
   },
   {
     type: "expr",
-    id: "Assignment",
-    nToken: null,
-    lToken: "ASSIGN",
-    oToken: null,
-    prec: 3,
-    assoc: "RIGHT",
-    affix: "INFIX",
-    arity: "BINARY",
-  },
-  {
-    type: "expr",
     id: "Increment",
     nToken: null,
     lToken: "INC",
@@ -280,6 +269,11 @@ const operators = [
     type: "sequence",
     id: "Comma",
     name: "COMMA",
+  },
+  {
+    type: "assign",
+    id: "Assign",
+    name: "ASSIGN",
   },
 ];
 
