@@ -11,6 +11,7 @@ const fail = (name, line, col) => {
 export const createParser = (operators, eoiName = "ENDOFINPUT") => {
   const ops = {};
   const seqOps = [];
+  const terms = [];
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
   const nuds = [];
   const leds = [];
@@ -283,6 +284,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       if (op.type === "sequence") {
         // add the token name to the sequence operators array
         seqOps.push(op.name);
+      }
+
+      if (op.type === "terminator") {
+        terms.push(op.name);
       }
     }
 
