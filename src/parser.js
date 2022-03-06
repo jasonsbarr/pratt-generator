@@ -69,11 +69,13 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       right: parseExpression(bp - assoc[tokAssoc]),
     });
 
-    const unop = (name, bp) => () => ({
-      type: "Unary Op",
-      op: name,
-      expr: parseExpression(bp),
-    });
+    const unop =
+      (name, bp, id = "Unary Op") =>
+      () => ({
+        type: id,
+        op: name,
+        expr: parseExpression(bp),
+      });
 
     const parseAtom = () => {
       // token is nonlocal
@@ -98,7 +100,6 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
     const parseExpr = (rbp = 0) => {
       let left = parseAtom();
       let prec = getPrec(token.name, "lToken");
-      console.log(prec);
 
       while (rbp < prec) {
         left = parseLed(left);
@@ -167,8 +168,17 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             nud[op.nToken] = unop(op.nToken, op.prec);
           }
 
+          if (op.affix === "INFIX") {
+            led[op.lToken] = unop(op.lToken, op.prec, op.id);
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return expr;
+            };
+          }
+
           if (op.affix === "MATCHFIX") {
-            nud[op.nToken] = () => parseExpression(op.prec);
+            nud[op.nToken] = () =>
+              token.name === op.oToken ? null : parseExpression(op.prec);
             ode[op.oToken] = (expr) => {
               token = next();
               return expr;
@@ -207,6 +217,20 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
               };
             }
           }
+
+          if (op.affix === "MATCHFIX") {
+            led[op.lToken] = (left) => ({
+              type: op.id,
+              first: left,
+              second:
+                token.name === op.oToken ? null : parseExpression(op.prec),
+            });
+
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return expr;
+            };
+          }
         }
 
         if (op.arity === "TERNARY") {
@@ -214,16 +238,19 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             led[op.lToken] = (left) => ({
               type: op.id,
               left,
-              middle: parseExpr(op.prec),
+              middle: parseExpression(op.prec),
             });
             ode[op.oToken] = (expr) => {
               token = next();
-              return { ...expr, right: parseExpr(op.prec) };
+              return { ...expr, right: parseExpression(op.prec) };
             };
           }
 
           if (op.affix === "MIXFIX") {
-            nud[op.nToken] = () => ({ type: op.id, first: parseExpr(op.prec) });
+            nud[op.nToken] = () => ({
+              type: op.id,
+              first: parseExpression(op.prec),
+            });
             led[op.lToken] = (left) => ({
               ...left,
               middle: parseExpr(op.prec),
@@ -235,7 +262,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           }
 
           if (op.affix === "MATCHFIX") {
-            nud[op.nToken] = () => ({ type: op.id, exprs: parseExpr(op.prec) });
+            nud[op.nToken] = () => ({
+              type: op.id,
+              exprs: parseExpression(op.prec),
+            });
             ode[op.oToken] = (expr) => {
               token = next();
               return expr;

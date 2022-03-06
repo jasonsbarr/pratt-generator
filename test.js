@@ -253,6 +253,17 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
+    id: "Call",
+    nToken: null,
+    lToken: "LPAREN",
+    oToken: "RPAREN",
+    prec: 90,
+    assoc: "LEFT",
+    affix: "MATCHFIX",
+    arity: "BINARY",
+  },
+  {
     type: "sequence",
     id: "Comma",
     name: "COMMA",
