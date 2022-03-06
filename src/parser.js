@@ -178,7 +178,11 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
           if (op.affix === "MATCHFIX") {
             nud[op.nToken] = () =>
-              token.name === op.oToken ? null : parseExpression(op.prec);
+              token.name === op.oToken
+                ? null
+                : op.id
+                ? { type: op.id, value: parseExpression(op.prec) }
+                : parseExpression(op.prec);
             ode[op.oToken] = (expr) => {
               token = next();
               return expr;
