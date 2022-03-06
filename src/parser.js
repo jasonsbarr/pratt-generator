@@ -74,7 +74,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       expr: parseExpr(bp),
     });
 
-    const parseExpr = (rbp = 0) => {
+    const parseAtom = () => {
       // token is nonlocal
       let t = token;
       token = next();
@@ -83,17 +83,27 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         fail(t.name, t.line, t.col);
       }
 
-      let left = nud[t.name](t);
+      return nud[t.name](t);
+    };
+
+    const parseLed = (left) => {
+      let t = token;
+      token = next();
+      return led[t.name](left);
+    };
+
+    const parseOde = (left) => ode[token.name](left);
+
+    const parseExpr = (rbp = 0) => {
+      let left = parseAtom();
       let prec = getPrec(token.name, "lToken");
 
       while (rbp < prec) {
-        t = token;
-        token = next();
-        left = led[t.name](left);
+        left = parseLed(left);
         prec = getPrec(token.name, "lToken");
 
         if (isOde(token.name)) {
-          left = ode[token.name](left);
+          left = parseOde(left);
           prec = getPrec(token.name, "lToken");
         }
       }
@@ -101,12 +111,25 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return left;
     };
 
+    const parseExpression = () => parseExpr(0);
+
     const parseToplevel = () => {
       if (!isValidSymbol(token.name)) {
         fail(token.name, token.line, token.col);
       }
 
-      return parseExpr(0);
+      return parseExpression();
+    };
+
+    const parseDelimited = (delimiter, left) => {
+      let exprs = [left];
+      exprs.push(parseAtom());
+      while (token.name === delimiter) {
+        token = next();
+        exprs.push(parseAtom());
+      }
+
+      return exprs;
     };
 
     // generate parser
@@ -179,29 +202,6 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             return { ...expr, right: parseExpr(op.prec) };
           };
         }
-      }
-
-      if (op.arity === "VARIABLE") {
-        // treat lToken as separator
-        led[op.lToken] = (left) => {
-          let exprs;
-
-          if (left.type === op.id) {
-            // is already a delimited sequence
-            exprs = left.exprs;
-          } else {
-            // is a bare expression
-            exprs = [left];
-          }
-
-          if (isNud(token.name)) {
-            while (isNud(token.name)) {
-              exprs.push(parseExpr(op.prec));
-            }
-          }
-
-          return { type: op.id, exprs };
-        };
 
         if (op.affix === "MATCHFIX") {
           nud[op.nToken] = () => ({ type: op.id, exprs: parseExpr(op.prec) });
