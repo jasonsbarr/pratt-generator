@@ -136,102 +136,107 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
     for (let op of operators) {
       ops[op.id] = setOperatorAtts(op);
 
-      if (op.nToken) {
-        nuds.push(op.nToken);
-      }
-
-      if (op.lToken) {
-        leds.push(op.lToken);
-      }
-
-      if (op.oToken) {
-        odes.push(op.oToken);
-      }
-
-      if (op.arity === "NONE") {
-        nud[op.nToken] = (expr) => expr;
-      }
-
-      if (op.arity === "UNARY") {
-        if (op.affix === "PREFIX") {
-          nud[op.nToken] = unop(op.nToken, op.prec);
+      if (op.type === "expr") {
+        if (op.nToken) {
+          nuds.push(op.nToken);
         }
 
-        if (op.affix === "MATCHFIX") {
-          nud[op.nToken] = () => parseExpr(op.prec);
-          ode[op.oToken] = (expr) => {
-            token = next();
-            return expr;
-          };
+        if (op.lToken) {
+          leds.push(op.lToken);
         }
 
-        if (op.affix === "POSTFIX") {
-          led[op.lToken] = (expr) => ({ ...expr, type: op.id });
-        }
-      }
-
-      if (op.arity === "BINARY") {
-        if (op.affix === "INFIX") {
-          led[op.lToken] = binop(
-            op.lToken,
-            op.prec,
-            op.assoc,
-            op.id.toLowerCase().includes("assignment") ? op.id : "Binary Op"
-          );
+        if (op.oToken) {
+          odes.push(op.oToken);
         }
 
-        if (op.affix === "MIXFIX") {
-          if (op.nToken) {
-            nud[op.nToken] = () => ({
-              type: op.id,
-              first: parseExpr(op.prec),
-            });
+        if (op.arity === "NONE") {
+          nud[op.nToken] = (expr) => expr;
+        }
+
+        if (op.arity === "UNARY") {
+          if (op.affix === "PREFIX") {
+            nud[op.nToken] = unop(op.nToken, op.prec);
           }
 
-          if (op.lToken) {
-            led[op.lToken] = (left) => ({
-              ...left,
-              second: parseExpr(op.prec),
-            });
-          }
-
-          if (op.oToken) {
+          if (op.affix === "MATCHFIX") {
+            nud[op.nToken] = () => parseExpr(op.prec);
             ode[op.oToken] = (expr) => {
               token = next();
               return expr;
             };
           }
-        }
-      }
 
-      if (op.arity === "TERNARY") {
-        if (op.affix === "INFIX") {
-          led[op.lToken] = (left) => ({
-            type: op.id,
-            left,
-            middle: parseExpr(op.prec),
-          });
-          ode[op.oToken] = (expr) => {
-            token = next();
-            return { ...expr, right: parseExpr(op.prec) };
-          };
+          if (op.affix === "POSTFIX") {
+            led[op.lToken] = (expr) => ({ ...expr, type: op.id });
+          }
         }
 
-        if (op.affix === "MIXFIX") {
-          nud[op.nToken] = () => ({ type: op.id, first: parseExpr(op.prec) });
-          led[op.lToken] = (left) => ({ ...left, middle: parseExpr(op.prec) });
-          ode[op.oToken] = (expr) => {
-            token = next();
-            return { ...expr, right: parseExpr(op.prec) };
-          };
+        if (op.arity === "BINARY") {
+          if (op.affix === "INFIX") {
+            led[op.lToken] = binop(
+              op.lToken,
+              op.prec,
+              op.assoc,
+              op.id.toLowerCase().includes("assignment") ? op.id : "Binary Op"
+            );
+          }
+
+          if (op.affix === "MIXFIX") {
+            if (op.nToken) {
+              nud[op.nToken] = () => ({
+                type: op.id,
+                first: parseExpr(op.prec),
+              });
+            }
+
+            if (op.lToken) {
+              led[op.lToken] = (left) => ({
+                ...left,
+                second: parseExpr(op.prec),
+              });
+            }
+
+            if (op.oToken) {
+              ode[op.oToken] = (expr) => {
+                token = next();
+                return expr;
+              };
+            }
+          }
         }
 
-        if (op.affix === "MATCHFIX") {
-          nud[op.nToken] = () => ({ type: op.id, exprs: parseExpr(op.prec) });
-          ode[op.oToken] = (expr) => {
-            token = next();
-            return expr;
-          };
+        if (op.arity === "TERNARY") {
+          if (op.affix === "INFIX") {
+            led[op.lToken] = (left) => ({
+              type: op.id,
+              left,
+              middle: parseExpr(op.prec),
+            });
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return { ...expr, right: parseExpr(op.prec) };
+            };
+          }
+
+          if (op.affix === "MIXFIX") {
+            nud[op.nToken] = () => ({ type: op.id, first: parseExpr(op.prec) });
+            led[op.lToken] = (left) => ({
+              ...left,
+              middle: parseExpr(op.prec),
+            });
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return { ...expr, right: parseExpr(op.prec) };
+            };
+          }
+
+          if (op.affix === "MATCHFIX") {
+            nud[op.nToken] = () => ({ type: op.id, exprs: parseExpr(op.prec) });
+            ode[op.oToken] = (expr) => {
+              token = next();
+              return expr;
+            };
+          }
         }
       }
     }

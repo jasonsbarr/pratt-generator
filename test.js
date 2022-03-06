@@ -32,6 +32,7 @@ export const tokenize = (input) =>
 
 const operators = [
   {
+    type: "expr",
     id: "NumberLiteral",
     nToken: "NUMBER",
     lToken: null,
@@ -42,6 +43,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "StringLiteral",
     nToken: "STRING",
     lToken: null,
@@ -52,6 +54,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "TrueLiteral",
     nToken: "TRUE",
     lToken: null,
@@ -62,6 +65,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "FalseLiteral",
     nToken: "FALSE",
     lToken: null,
@@ -72,6 +76,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "NullLiteral",
     nToken: "NULL",
     lToken: null,
@@ -82,6 +87,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "Identifier",
     nToken: "IDENT",
     lToken: null,
@@ -92,6 +98,7 @@ const operators = [
     arity: "NONE",
   },
   {
+    type: "expr",
     id: "Plus",
     nToken: null,
     lToken: "PLUS",
@@ -102,6 +109,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "Minus",
     nToken: null,
     lToken: "MINUS",
@@ -112,6 +120,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "Mul",
     nToken: null,
     lToken: "MUL",
@@ -122,6 +131,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "Div",
     nToken: null,
     lToken: "DIV",
@@ -132,6 +142,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "Exp",
     nToken: null,
     lToken: "EXP",
@@ -142,6 +153,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "UPlus",
     nToken: "PLUS",
     lToken: null,
@@ -152,6 +164,7 @@ const operators = [
     arity: "UNARY",
   },
   {
+    type: "expr",
     id: "UMinus",
     nToken: "MINUS",
     lToken: null,
@@ -162,6 +175,7 @@ const operators = [
     arity: "UNARY",
   },
   {
+    type: "expr",
     id: "Parentheses",
     nToken: "LPAREN",
     lToken: null,
@@ -172,6 +186,7 @@ const operators = [
     arity: "UNARY",
   },
   {
+    type: "expr",
     id: "IfElse",
     nToken: null,
     lToken: "IF",
@@ -182,6 +197,7 @@ const operators = [
     arity: "TERNARY",
   },
   {
+    type: "expr",
     id: "IfThenElse",
     nToken: "IF",
     lToken: "THEN",
@@ -192,6 +208,7 @@ const operators = [
     arity: "TERNARY",
   },
   {
+    type: "expr",
     id: "Assignment",
     nToken: null,
     lToken: "ASSIGN",
@@ -202,6 +219,7 @@ const operators = [
     arity: "BINARY",
   },
   {
+    type: "expr",
     id: "Increment",
     nToken: null,
     lToken: "INC",
@@ -212,6 +230,7 @@ const operators = [
     arity: "UNARY",
   },
   {
+    type: "expr",
     id: "Lambda",
     nToken: "LAM",
     lToken: "ARROW",
@@ -221,8 +240,13 @@ const operators = [
     affix: "MIXFIX",
     arity: "BINARY",
   },
+  {
+    type: "separator",
+  },
 ];
 
-const parser = createParser(operators);
+const separators = ["COMMA"];
+
+const parser = createParser(operators, separators);
 
 export const parse = (input) => parser(tokenize(input));
