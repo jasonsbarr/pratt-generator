@@ -10,6 +10,7 @@ const fail = (name, line, col) => {
 
 export const createParser = (operators, eoiName = "ENDOFINPUT") => {
   const ops = {};
+  const seqOps = [];
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
   const nuds = [];
   const leds = [];
@@ -65,13 +66,13 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       type: id,
       left,
       op: name,
-      right: parseExpr(bp - assoc[tokAssoc]),
+      right: parseExpression(bp - assoc[tokAssoc]),
     });
 
     const unop = (name, bp) => () => ({
       type: "Unary Op",
       op: name,
-      expr: parseExpr(bp),
+      expr: parseExpression(bp),
     });
 
     const parseAtom = () => {
@@ -111,7 +112,24 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return left;
     };
 
-    const parseExpression = () => parseExpr(0);
+    const parseExpression = (bp = 0) => {
+      let exp = parseExpr(bp);
+
+      if (seqOps.includes(token.name)) {
+        exp = [exp];
+
+        while (seqOps.includes(token.name)) {
+          token = next();
+          exp.push(parseExpr(0));
+        }
+
+        if (isOde(token.name)) {
+          exp = parseOde(exp);
+        }
+      }
+
+      return exp;
+    };
 
     const parseToplevel = () => {
       if (!isValidSymbol(token.name)) {
@@ -121,22 +139,12 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return parseExpression();
     };
 
-    const parseDelimited = (delimiter, left) => {
-      let exprs = [left];
-      exprs.push(parseAtom());
-      while (token.name === delimiter) {
-        token = next();
-        exprs.push(parseAtom());
-      }
-
-      return exprs;
-    };
-
     // generate parser
     for (let op of operators) {
       ops[op.id] = setOperatorAtts(op);
 
       if (op.type === "expr") {
+        // Create expression rules for the operator
         if (op.nToken) {
           nuds.push(op.nToken);
         }
@@ -159,7 +167,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           }
 
           if (op.affix === "MATCHFIX") {
-            nud[op.nToken] = () => parseExpr(op.prec);
+            nud[op.nToken] = () => parseExpression(op.prec);
             ode[op.oToken] = (expr) => {
               token = next();
               return expr;
@@ -185,14 +193,14 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             if (op.nToken) {
               nud[op.nToken] = () => ({
                 type: op.id,
-                first: parseExpr(op.prec),
+                first: parseExpression(op.prec),
               });
             }
 
             if (op.lToken) {
               led[op.lToken] = (left) => ({
                 ...left,
-                second: parseExpr(op.prec),
+                second: parseExpression(op.prec),
               });
             }
 
@@ -238,6 +246,11 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
             };
           }
         }
+      }
+
+      if (op.type === "sequence") {
+        // add the token name to the sequence operators array
+        seqOps.push(op.name);
       }
     }
 

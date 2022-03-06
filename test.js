@@ -241,12 +241,12 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "separator",
+    type: "sequence",
+    id: "Comma",
+    name: "COMMA",
   },
 ];
 
-const separators = ["COMMA"];
-
-const parser = createParser(operators, separators);
+const parser = createParser(operators);
 
 export const parse = (input) => parser(tokenize(input));
