@@ -179,7 +179,9 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           if (op.affix === "MATCHFIX") {
             nud[op.nToken] = () =>
               token.name === op.oToken
-                ? null
+                ? op.id
+                  ? { type: op.id, value: null }
+                  : fail("EMPTY UNARY MATCHFIX OPERATOR", token.line, token.col)
                 : op.id
                 ? { type: op.id, value: parseExpression(op.prec) }
                 : parseExpression(op.prec);
