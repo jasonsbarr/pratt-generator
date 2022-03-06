@@ -98,6 +98,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
     const parseExpr = (rbp = 0) => {
       let left = parseAtom();
       let prec = getPrec(token.name, "lToken");
+      console.log(prec);
 
       while (rbp < prec) {
         left = parseLed(left);
@@ -181,12 +182,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
         if (op.arity === "BINARY") {
           if (op.affix === "INFIX") {
-            led[op.lToken] = binop(
-              op.lToken,
-              op.prec,
-              op.assoc,
-              op.id.toLowerCase().includes("assignment") ? op.id : "Binary Op"
-            );
+            led[op.lToken] = binop(op.lToken, op.prec, op.assoc, op.id);
           }
 
           if (op.affix === "MIXFIX") {
