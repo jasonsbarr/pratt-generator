@@ -1,31 +1,27 @@
 import { lexer, rule } from "@jasonsbarr/lexer";
 import { createParser } from "./src/parser.js";
 
-const rules = [
-  rule("WS", "WS", String.raw`\s+`),
-  rule("Number", "NUMBER", String.raw`\d+`),
-  rule("String", "STRING", String.raw`"(?:\\.|[^\\"])*"?`),
-  rule("True", "TRUE", String.raw`true`),
-  rule("False", "FALSE", String.raw`false`),
-  rule("Null", "NULL", String.raw`null`),
-  rule("Keyword", "LAM", String.raw`lam`),
-  rule("Symbol", "ARROW", String.raw`->`),
-  rule("Symbol", "INC", String.raw`\+\+`),
-  rule("Symbol", "PLUS", String.raw`\+`),
-  rule("Symbol", "MINUS", String.raw`-`),
-  rule("Symbol", "EXP", String.raw`\*\*`),
-  rule("Symbol", "MUL", String.raw`\*`),
-  rule("Symbol", "DIV", String.raw`/`),
-  rule("Punc", "LPAREN", String.raw`\(`),
-  rule("Punc", "RPAREN", String.raw`\)`),
-  rule("Keyword", "IF", String.raw`if`),
-  rule("Keyword", "ELSE", String.raw`else`),
-  rule("Keyword", "THEN", String.raw`then`),
-  rule("Punc", "COMMA", String.raw`,`),
-  rule("Symbol", "ASSIGN", String.raw`=`),
-  rule("Symbol", "IDENT", String.raw`[a-zA-Z_][\w]*`),
-];
-// ([^"\\]\\.)*"
+const keywords = ["true", "false", "null", "lam", "if", "else", "then"];
+
+const rules = keywords
+  .map((k) => rule("Keyword", k.toUpperCase(), k))
+  .concat([
+    rule("WS", "WS", String.raw`\s+`),
+    rule("Number", "NUMBER", String.raw`\d+`),
+    rule("String", "STRING", String.raw`"(?:\\.|[^\\"])*"?`),
+    rule("Symbol", "ARROW", String.raw`->`),
+    rule("Symbol", "INC", String.raw`\+\+`),
+    rule("Symbol", "PLUS", String.raw`\+`),
+    rule("Symbol", "MINUS", String.raw`-`),
+    rule("Symbol", "EXP", String.raw`\*\*`),
+    rule("Symbol", "MUL", String.raw`\*`),
+    rule("Symbol", "DIV", String.raw`/`),
+    rule("Punc", "LPAREN", String.raw`\(`),
+    rule("Punc", "RPAREN", String.raw`\)`),
+    rule("Punc", "COMMA", String.raw`,`),
+    rule("Symbol", "ASSIGN", String.raw`=`),
+    rule("Symbol", "IDENT", String.raw`[a-zA-Z_][\w]*`),
+  ]);
 
 const lex = lexer(rules);
 
