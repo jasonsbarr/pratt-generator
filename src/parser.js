@@ -121,17 +121,6 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
       return parseExpression();
     };
 
-    const parseDelimited = (delimiter, left) => {
-      let exprs = [left];
-      exprs.push(parseAtom());
-      while (token.name === delimiter) {
-        token = next();
-        exprs.push(parseAtom());
-      }
-
-      return exprs;
-    };
-
     // generate parser
     for (let op of operators) {
       ops[op.id] = setOperatorAtts(op);
