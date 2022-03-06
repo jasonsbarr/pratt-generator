@@ -1,7 +1,17 @@
 import { lexer, rule } from "@jasonsbarr/lexer";
 import { createParser } from "./src/parser.js";
 
-const keywords = ["true", "false", "null", "lam", "if", "else", "then"];
+const keywords = [
+  "true",
+  "false",
+  "null",
+  "lam",
+  "if",
+  "else",
+  "then",
+  "let",
+  "in",
+];
 
 const rules = keywords
   .map((k) => rule("Keyword", k.toUpperCase(), k))
@@ -35,7 +45,7 @@ export const tokenize = (input) =>
 
 const operators = [
   {
-    type: "expr",
+    type: "oper",
     id: "NumberLiteral",
     nToken: "NUMBER",
     lToken: null,
@@ -46,7 +56,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "StringLiteral",
     nToken: "STRING",
     lToken: null,
@@ -57,7 +67,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "TrueLiteral",
     nToken: "TRUE",
     lToken: null,
@@ -68,7 +78,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "FalseLiteral",
     nToken: "FALSE",
     lToken: null,
@@ -79,7 +89,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "NullLiteral",
     nToken: "NULL",
     lToken: null,
@@ -90,7 +100,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Identifier",
     nToken: "IDENT",
     lToken: null,
@@ -101,7 +111,7 @@ const operators = [
     arity: "NONE",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Plus",
     nToken: null,
     lToken: "PLUS",
@@ -112,7 +122,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Minus",
     nToken: null,
     lToken: "MINUS",
@@ -123,7 +133,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Mul",
     nToken: null,
     lToken: "MUL",
@@ -134,7 +144,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Div",
     nToken: null,
     lToken: "DIV",
@@ -145,7 +155,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Exp",
     nToken: null,
     lToken: "EXP",
@@ -156,7 +166,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "UPlus",
     nToken: "PLUS",
     lToken: null,
@@ -167,7 +177,7 @@ const operators = [
     arity: "UNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "UMinus",
     nToken: "MINUS",
     lToken: null,
@@ -178,7 +188,7 @@ const operators = [
     arity: "UNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: null,
     nToken: "LPAREN",
     lToken: null,
@@ -189,7 +199,7 @@ const operators = [
     arity: "UNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "IfElse",
     nToken: null,
     lToken: "IF",
@@ -200,7 +210,7 @@ const operators = [
     arity: "TERNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "IfThenElse",
     nToken: "IF",
     lToken: "THEN",
@@ -211,7 +221,7 @@ const operators = [
     arity: "TERNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Increment",
     nToken: null,
     lToken: "INC",
@@ -222,7 +232,7 @@ const operators = [
     arity: "UNARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Lambda",
     nToken: "LAM",
     lToken: "ARROW",
@@ -233,7 +243,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Member Access",
     nToken: null,
     lToken: "DOT",
@@ -244,7 +254,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "Call",
     nToken: null,
     lToken: "LPAREN",
@@ -255,7 +265,7 @@ const operators = [
     arity: "BINARY",
   },
   {
-    type: "expr",
+    type: "oper",
     id: "List",
     nToken: "LBRACK",
     lToken: null,
@@ -264,6 +274,17 @@ const operators = [
     assoc: "NONE",
     affix: "MATCHFIX",
     arity: "UNARY",
+  },
+  {
+    type: "oper",
+    id: "Let",
+    nToken: "LET",
+    lToken: "IN",
+    oToken: null,
+    prec: 5,
+    assoc: "NONE",
+    affix: "MIXFIX",
+    arity: "BINARY",
   },
   {
     type: "sequence",

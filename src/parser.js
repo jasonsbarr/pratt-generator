@@ -8,7 +8,10 @@ const fail = (name, line, col) => {
   throw new ParseError(name, line, col);
 };
 
-export const createParser = (operators, eoiName = "ENDOFINPUT") => {
+export const createParser = (
+  operators,
+  { assignPrec = 5, eoiName = "ENDOFINPUT" } = {}
+) => {
   const ops = {};
   const seqOps = [];
   const terms = [];
@@ -64,8 +67,8 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
     const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
 
-    const binop = (name, bp, tokAssoc, id) => (left) => ({
-      type: id,
+    const binop = (name, bp, tokAssoc) => (left) => ({
+      type: "Binary Op",
       left,
       op: name,
       right: parseExpression(bp - assoc[tokAssoc]),
@@ -124,7 +127,7 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         type: "Assign",
         op: t.name,
         left,
-        right: parseExpression(),
+        right: parseExpression(assignPrec),
       };
     };
 
@@ -163,7 +166,10 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
     for (let op of operators) {
       ops[op.id] = setOperatorAtts(op);
 
-      if (op.type === "expr") {
+      /**
+       * Types of operations
+       */
+      if (op.type === "oper") {
         // Create expression rules for the operator
         if (op.nToken) {
           nuds.push(op.nToken);
@@ -177,10 +183,16 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           odes.push(op.oToken);
         }
 
+        /**
+         * 0-arity operations, e.g. literals
+         */
         if (op.arity === "NONE") {
           nud[op.nToken] = (expr) => expr;
         }
 
+        /**
+         * Unary operations
+         */
         if (op.arity === "UNARY") {
           if (op.affix === "PREFIX") {
             nud[op.nToken] = unop(op.nToken, op.prec);
@@ -214,6 +226,9 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           }
         }
 
+        /**
+         * Binary operations
+         */
         if (op.arity === "BINARY") {
           if (op.affix === "INFIX") {
             led[op.lToken] = binop(op.lToken, op.prec, op.assoc, op.id);
@@ -221,17 +236,21 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
 
           if (op.affix === "MIXFIX") {
             if (op.nToken) {
-              nud[op.nToken] = () => ({
-                type: op.id,
-                first: parseExpression(op.prec),
-              });
+              nud[op.nToken] = () => {
+                return {
+                  type: op.id,
+                  first: parseExpression(op.prec),
+                };
+              };
             }
 
             if (op.lToken) {
-              led[op.lToken] = (left) => ({
-                ...left,
-                second: parseExpression(op.prec),
-              });
+              led[op.lToken] = (left) => {
+                return {
+                  ...left,
+                  second: parseExpression(op.prec),
+                };
+              };
             }
 
             if (op.oToken) {
@@ -257,6 +276,9 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
           }
         }
 
+        /**
+         * Ternary operations
+         */
         if (op.arity === "TERNARY") {
           if (op.affix === "INFIX") {
             led[op.lToken] = (left) => ({
@@ -298,15 +320,24 @@ export const createParser = (operators, eoiName = "ENDOFINPUT") => {
         }
       }
 
+      /**
+       * Separaters for operation sequences
+       */
       if (op.type === "sequence") {
         // add the token name to the sequence operators array
         seqOps.push(op.name);
       }
 
+      /**
+       * Operation terminators, e.g. semicolon in C
+       */
       if (op.type === "terminator") {
         terms.push(op.name);
       }
 
+      /**
+       * Assignment-specific operators
+       */
       if (op.type === "assign") {
         assigns.push(op.name);
       }
