@@ -133,7 +133,7 @@ export const createParser = (
 
       return {
         type: "Assign",
-        op: t.name,
+        op: t.val,
         left,
         right: parseExpression(assignPrec),
       };
@@ -146,12 +146,17 @@ export const createParser = (
         fail(token.name, token.line, token.col);
       }
 
-      return next();
+      let t = token;
+      token = next();
+      return t;
     };
 
     const tryParseRulePart = (part) => {
       let field = part.field;
       let value = null;
+
+      if (part.required === "yes") {
+      }
 
       return [field, value];
     };
@@ -197,6 +202,10 @@ export const createParser = (
           return exp;
         }
       }
+
+      // rewind the token stream to try parsing an operation
+      pos = p;
+      token = tokens[pos];
 
       // if no parse rule matched, see if the name is a named operation
       if (name in ops) {
