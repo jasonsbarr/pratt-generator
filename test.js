@@ -13,7 +13,7 @@ const keywords = [
   "in",
 ];
 
-const rules = keywords
+const lexRules = keywords
   .map((k) => rule("Keyword", k.toUpperCase(), k))
   .concat([
     rule("WS", "WS", String.raw`\s+`),
@@ -36,7 +36,7 @@ const rules = keywords
     rule("Symbol", "IDENT", String.raw`[a-zA-Z_][\w]*`),
   ]);
 
-const lex = lexer(rules);
+const lex = lexer(lexRules);
 
 const filterWs = (tokens) => [...tokens].filter((t) => t.type !== "WS");
 
@@ -297,6 +297,10 @@ const operators = [
     name: "ASSIGN",
   },
 ];
+
+const rules = `
+DefFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
+`;
 
 const parser = createParser(operators);
 
