@@ -302,6 +302,6 @@ const rules = `
 DefFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
 `;
 
-const parser = createParser(operators);
+const parser = createParser(operators, { rules });
 
 export const parse = (input) => parser(tokenize(input));

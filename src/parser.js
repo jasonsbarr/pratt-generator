@@ -15,8 +15,8 @@ export const createParser = (
   { assignPrec = 5, eoi = "ENDOFINPUT", rules = null } = {}
 ) => {
   const ops = {};
-  const pRules = {};
-  const dispatchRules = {};
+  let pRules = {};
+  let dispatchRules = {};
   const seqOps = [];
   const terms = [];
   const assigns = [];
@@ -109,8 +109,6 @@ export const createParser = (
     const parseExpr = (rbp = 0) => {
       let left = parseAtom();
       let prec = getPrec(token.name, "lToken");
-      console.log("ode:", isOde(token.name));
-      console.log("token:", token.name);
 
       while (rbp < prec) {
         left = parseLed(left);
@@ -168,6 +166,7 @@ export const createParser = (
       if (!isValidSymbol(token.name)) {
         fail(token.name, token.line, token.col);
       }
+      console.log("rules:", pRules);
 
       return parseExpression();
     };
@@ -256,7 +255,6 @@ export const createParser = (
 
             if (op.lToken) {
               led[op.lToken] = (left) => {
-                console.log("left", left);
                 return {
                   ...left,
                   second: parseExpression(op.prec),
@@ -359,7 +357,6 @@ export const createParser = (
      */
     if (rules) {
       pRules = parseRules(rules);
-      console.log(pRules);
     }
 
     return parseToplevel();

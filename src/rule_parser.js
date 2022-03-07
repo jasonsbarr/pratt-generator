@@ -23,10 +23,9 @@ const makeRulePart = (word) => {
     ? [getKleene(ruleStr), ruleStr.slice(0, -1)]
     : ["yes", ruleStr];
   const options = isOpt(ruleStr) ? splitOpts(ruleStr) : null;
-  const name = options ? null : ruleStr;
   const terminal = isTerminal(ruleStr);
 
-  return { field, required, rule, options, name, terminal };
+  return { field, required, rule, options, terminal };
 };
 
 const makeRule = (ruleArr) => {
