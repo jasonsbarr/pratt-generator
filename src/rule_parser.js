@@ -1,3 +1,15 @@
+import { rule, lexer } from "@jasonsbarr/lexer";
+
+const rules = [
+  rule("WS", "WS", String.raw`\s+`),
+  rule("Option", "OPTION", String.raw`(\w+:)?\(.*\)(\+|\*|\?)?`),
+  rule("Group", "GROUP", String.raw`(\w+:)?\[.*\](\+|\*|\?)?`),
+  rule("Terminal", "TERMINAL", String.raw`(\w+:)?[A-Z]+(\+|\*|\?)?`),
+  rule("Nonterminal", "NONTERMINAL", String.raw`(\w+:)?\w+(\+|\*|\?)?`),
+];
+
+const lex = lexer(rules).compile();
+
 const isTerminal = (sym) => sym === sym.toUpperCase();
 const getLines = (rules) => {
   if (!rules.includes("\r\n") && !rules.includes("\n")) {
@@ -8,7 +20,11 @@ const getLines = (rules) => {
   const rs = cr.length > 1 ? cr : rules.split("\n");
   return rs.filter((r) => r !== "");
 };
-const splitRule = (rule) => rule.split(" ").filter((w) => w !== "");
+const splitRule = (rule) =>
+  [...lex.input(rule).tokenize()]
+    .slice(0, -1)
+    .filter((t) => t.name !== "WS")
+    .map((t) => t.val);
 const isKleene = (rule) =>
   rule.endsWith("?") || rule.endsWith("*") || rule.endsWith("+");
 const getKleene = (rule) => rule.slice(-1);
