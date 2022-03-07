@@ -374,7 +374,7 @@ export const createParser = (
         let rulesSet = [];
         if (rule[0].terminal) {
           dispatchRules[rule[0].rule] = dispatchRules[rule[0].rule]
-            ? [...dispatchRules[rule.rule], name]
+            ? [...dispatchRules[rule[0].rule], name]
             : [name];
 
           rulesSet.push(name);
