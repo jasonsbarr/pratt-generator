@@ -11,6 +11,7 @@ const keywords = [
   "then",
   "let",
   "in",
+  "end",
 ];
 
 const lexRules = keywords
