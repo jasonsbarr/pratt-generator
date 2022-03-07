@@ -302,8 +302,8 @@ const operators = [
 
 const rules = `
 # function definition
-# defFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
-paramList IDENT [COMMA IDENT]*
+# note that params:expr will also parse a comma-separated sequence of exprs
+functionDef DEF name:IDENT LPAREN params:identifier RPAREN stat+ END
 `;
 
 const parser = createParser(operators, { rules });
