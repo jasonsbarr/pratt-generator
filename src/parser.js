@@ -14,6 +14,7 @@ export const createParser = (
 ) => {
   const ops = {};
   const parseRules = {};
+  const dispatchRules = {};
   const seqOps = [];
   const terms = [];
   const assigns = [];
