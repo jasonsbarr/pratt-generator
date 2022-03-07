@@ -48,7 +48,7 @@ export const tokenize = (input) =>
 const operators = [
   {
     type: "oper",
-    id: "NumberLiteral",
+    id: "numberLiteral",
     nToken: "NUMBER",
     lToken: null,
     oToken: null,
@@ -59,7 +59,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "StringLiteral",
+    id: "stringLiteral",
     nToken: "STRING",
     lToken: null,
     oToken: null,
@@ -70,7 +70,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "TrueLiteral",
+    id: "trueLiteral",
     nToken: "TRUE",
     lToken: null,
     oToken: null,
@@ -81,7 +81,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "FalseLiteral",
+    id: "falseLiteral",
     nToken: "FALSE",
     lToken: null,
     oToken: null,
@@ -92,7 +92,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "NullLiteral",
+    id: "nullLiteral",
     nToken: "NULL",
     lToken: null,
     oToken: null,
@@ -103,7 +103,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Identifier",
+    id: "identifier",
     nToken: "IDENT",
     lToken: null,
     oToken: null,
@@ -114,7 +114,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Plus",
+    id: "plus",
     nToken: null,
     lToken: "PLUS",
     oToken: null,
@@ -125,7 +125,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Minus",
+    id: "minus",
     nToken: null,
     lToken: "MINUS",
     oToken: null,
@@ -136,7 +136,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Mul",
+    id: "mul",
     nToken: null,
     lToken: "MUL",
     oToken: null,
@@ -147,7 +147,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Div",
+    id: "div",
     nToken: null,
     lToken: "DIV",
     oToken: null,
@@ -158,7 +158,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Exp",
+    id: "exp",
     nToken: null,
     lToken: "EXP",
     oToken: null,
@@ -169,7 +169,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "UPlus",
+    id: "uPlus",
     nToken: "PLUS",
     lToken: null,
     oToken: null,
@@ -180,7 +180,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "UMinus",
+    id: "uMinus",
     nToken: "MINUS",
     lToken: null,
     oToken: null,
@@ -202,7 +202,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "IfElse",
+    id: "ifElse",
     nToken: null,
     lToken: "IF",
     oToken: "ELSE",
@@ -213,7 +213,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "IfThenElse",
+    id: "ifThenElse",
     nToken: "IF",
     lToken: "THEN",
     oToken: "ELSE",
@@ -224,7 +224,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Increment",
+    id: "increment",
     nToken: null,
     lToken: "INC",
     oToken: null,
@@ -235,7 +235,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Lambda",
+    id: "lambda",
     nToken: "LAM",
     lToken: "ARROW",
     oToken: null,
@@ -246,7 +246,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Member Access",
+    id: "memberAccess",
     nToken: null,
     lToken: "DOT",
     oToken: null,
@@ -257,7 +257,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Call",
+    id: "call",
     nToken: null,
     lToken: "LPAREN",
     oToken: "RPAREN",
@@ -268,7 +268,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "List",
+    id: "list",
     nToken: "LBRACK",
     lToken: null,
     oToken: "RBRACK",
@@ -279,7 +279,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: "Let",
+    id: "let",
     nToken: "LET",
     lToken: "IN",
     oToken: null,
@@ -302,7 +302,8 @@ const operators = [
 
 const rules = `
 # function definition
-DefFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
+# defFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
+paramList IDENT [COMMA IDENT]*
 `;
 
 const parser = createParser(operators, { rules });
