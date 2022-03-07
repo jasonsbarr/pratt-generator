@@ -149,7 +149,40 @@ export const createParser = (
       return next();
     };
 
+    const tryParseRule = (rule) => {
+      return null;
+    };
+
+    const tryParse = (tName) => {
+      let p = pos;
+      let options = dispatchRules[tName];
+
+      for (let opt of options) {
+        let exp = tryParseRule(pRules[opt]);
+
+        if (exp) {
+          return exp;
+        }
+
+        // rewind the token stream to try the next option
+        pos = p;
+        token = tokens[pos];
+      }
+
+      // no rule matched - error
+      throw new Error(
+        `No matching rule found for token ${token.name} at ${token.line}:${token.col}`
+      );
+    };
+
     const parseExpression = (bp = 0) => {
+      const isRule = token.name in dispatchRules;
+
+      if (isRule) {
+        console.log(token.name);
+        return tryParse(token.name);
+      }
+
       let exp = parseExpr(bp);
 
       if (seqOps.includes(token.name)) {
@@ -173,11 +206,10 @@ export const createParser = (
     };
 
     const parseToplevel = () => {
-      if (!isValidSymbol(token.name)) {
-        fail(token.name, token.line, token.col);
-      }
+      // if (!isValidSymbol(token.name)) {
+      //   fail(token.name, token.line, token.col);
+      // }
       console.log("rules:", pRules);
-      console.log("dispatch:", dispatchRules);
 
       return parseExpression();
     };
