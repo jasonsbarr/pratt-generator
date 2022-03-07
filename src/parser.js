@@ -150,8 +150,9 @@ export const createParser = (
     };
 
     const tryParseRulePart = (part) => {
-      let field = null;
+      let field = part.field;
       let value = null;
+
       return [field, value];
     };
 
@@ -172,9 +173,10 @@ export const createParser = (
       return parsed;
     };
 
-    const tryParse = (tName) => {
+    const tryParse = (name) => {
       let p = pos;
-      let options = dispatchRules[tName];
+      // first, see if there's a token name dispatcher for {name}
+      let options = dispatchRules[name] ? dispatchRules[name] : [];
 
       for (let opt of options) {
         let exp = tryParseRule(pRules[opt]);
@@ -186,6 +188,19 @@ export const createParser = (
         // rewind the token stream to try the next option
         pos = p;
         token = tokens[pos];
+      }
+
+      // if no named token dispatcher matched, see if the name matches a parse rule
+      if (name in pRules) {
+        exp = tryParseRule(pRules[name]);
+        if (exp) {
+          return exp;
+        }
+      }
+
+      // if no parse rule matched, see if the name is a named operation
+      if (name in ops) {
+        return parseExpression();
       }
 
       // no rule matched - error
