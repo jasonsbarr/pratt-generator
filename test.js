@@ -238,7 +238,7 @@ const operators = [
     lToken: "ARROW",
     oToken: null,
     prec: 5,
-    assoc: "RIGHT",
+    assoc: "LEFT",
     affix: "MIXFIX",
     arity: "BINARY",
   },

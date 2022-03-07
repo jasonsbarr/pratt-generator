@@ -10,9 +10,10 @@ const fail = (name, line, col) => {
 
 export const createParser = (
   operators,
-  { assignPrec = 5, eoiName = "ENDOFINPUT" } = {}
+  { assignPrec = 5, eoi = "ENDOFINPUT", rules = null } = {}
 ) => {
   const ops = {};
+  const parseRules = {};
   const seqOps = [];
   const terms = [];
   const assigns = [];
@@ -68,14 +69,14 @@ export const createParser = (
     const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
 
     const binop = (name, bp, tokAssoc) => (left) => ({
-      type: "Binary Op",
+      type: "BinaryOp",
       left,
       op: name,
       right: parseExpression(bp - assoc[tokAssoc]),
     });
 
     const unop =
-      (name, bp, id = "Unary Op") =>
+      (name, bp, id = "UnaryOp") =>
       () => ({
         type: id,
         op: name,
@@ -105,6 +106,8 @@ export const createParser = (
     const parseExpr = (rbp = 0) => {
       let left = parseAtom();
       let prec = getPrec(token.name, "lToken");
+      console.log("ode:", isOde(token.name));
+      console.log("token:", token.name);
 
       while (rbp < prec) {
         left = parseLed(left);
@@ -114,6 +117,10 @@ export const createParser = (
           left = parseOde(left);
           prec = getPrec(token.name, "lToken");
         }
+      }
+
+      if (isOde(token.name)) {
+        left = parseOde(left);
       }
 
       return left;
@@ -246,6 +253,7 @@ export const createParser = (
 
             if (op.lToken) {
               led[op.lToken] = (left) => {
+                console.log("left", left);
                 return {
                   ...left,
                   second: parseExpression(op.prec),
