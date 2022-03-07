@@ -2,6 +2,7 @@ import { rule, lexer } from "@jasonsbarr/lexer";
 
 const rules = [
   rule("WS", "WS", String.raw`\s+`),
+  rule("Comment", "COMMENT", String.raw`#.*`),
   rule("Option", "OPTION", String.raw`(\w+:)?\(.*\)(\+|\*|\?)?`),
   rule("Group", "GROUP", String.raw`(\w+:)?\[.*\](\+|\*|\?)?`),
   rule("Terminal", "TERMINAL", String.raw`(\w+:)?[A-Z]+(\+|\*|\?)?`),
@@ -23,7 +24,7 @@ const getLines = (rules) => {
 const splitRule = (rule) =>
   [...lex.input(rule).tokenize()]
     .slice(0, -1)
-    .filter((t) => t.name !== "WS")
+    .filter((t) => t.name !== "WS" && t.name !== "COMMENT")
     .map((t) => t.val);
 const isKleene = (rule) =>
   rule.endsWith("?") || rule.endsWith("*") || rule.endsWith("+");
@@ -54,9 +55,6 @@ export const parseRules = (rules) => {
   let rulesObj = {};
 
   for (let line of lines) {
-    if (line.startsWith("#")) {
-      continue;
-    }
     const [name, parts] = makeRule(splitRule(line));
     rulesObj[name] = parts;
   }
