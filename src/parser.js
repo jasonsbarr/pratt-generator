@@ -139,6 +139,16 @@ export const createParser = (
       };
     };
 
+    const match = (name) => token.name === name;
+
+    const eat = (name) => {
+      if (token.name !== name) {
+        fail(token.name, token.line, token.col);
+      }
+
+      return next();
+    };
+
     const parseExpression = (bp = 0) => {
       let exp = parseExpr(bp);
 
@@ -167,6 +177,7 @@ export const createParser = (
         fail(token.name, token.line, token.col);
       }
       console.log("rules:", pRules);
+      console.log("dispatch:", dispatchRules);
 
       return parseExpression();
     };
@@ -357,6 +368,18 @@ export const createParser = (
      */
     if (rules) {
       pRules = parseRules(rules);
+
+      // Create dispatch table on initial tokens
+      for (let [name, rule] of Object.entries(pRules)) {
+        let rulesSet = [];
+        if (rule[0].terminal) {
+          dispatchRules[rule[0].rule] = dispatchRules[rule[0].rule]
+            ? [...dispatchRules[rule.rule], name]
+            : [name];
+
+          rulesSet.push(name);
+        }
+      }
     }
 
     return parseToplevel();
