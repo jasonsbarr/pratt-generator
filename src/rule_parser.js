@@ -55,8 +55,11 @@ export const parseRules = (rules) => {
   let rulesObj = {};
 
   for (let line of lines) {
-    const [name, parts] = makeRule(splitRule(line));
-    rulesObj[name] = parts;
+    const rArr = splitRule(line);
+    if (rArr.length > 0) {
+      const [name, parts] = makeRule(rArr);
+      rulesObj[name] = parts;
+    }
   }
 
   return rulesObj;
