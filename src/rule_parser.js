@@ -38,6 +38,9 @@ export const parseRules = (rules) => {
   let rulesObj = {};
 
   for (let line of lines) {
+    if (line.startsWith("#")) {
+      continue;
+    }
     const [name, parts] = makeRule(splitRule(line));
     rulesObj[name] = parts;
   }

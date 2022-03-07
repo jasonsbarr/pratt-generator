@@ -12,6 +12,7 @@ const keywords = [
   "let",
   "in",
   "end",
+  "def",
 ];
 
 const lexRules = keywords
@@ -300,6 +301,7 @@ const operators = [
 ];
 
 const rules = `
+# function definition
 DefFunc DEF name:IDENT LPAREN params:IDENT* RPAREN stat+ END
 `;
 
