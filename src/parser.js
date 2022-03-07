@@ -149,8 +149,27 @@ export const createParser = (
       return next();
     };
 
+    const tryParseRulePart = (part) => {
+      let field = null;
+      let value = null;
+      return [field, value];
+    };
+
     const tryParseRule = (rule) => {
-      return null;
+      console.log(rule);
+      let parsed;
+      for (let part of rule) {
+        try {
+          let [field, value] = tryParseRulePart(part);
+          if (field) {
+            parsed = parsed ? { ...parsed } : {};
+            parsed[field] = value;
+          }
+        } catch (e) {
+          return null;
+        }
+      }
+      return parsed;
     };
 
     const tryParse = (tName) => {
@@ -209,7 +228,6 @@ export const createParser = (
       // if (!isValidSymbol(token.name)) {
       //   fail(token.name, token.line, token.col);
       // }
-      console.log("rules:", pRules);
 
       return parseExpression();
     };
