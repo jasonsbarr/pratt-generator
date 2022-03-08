@@ -151,11 +151,36 @@ export const createParser = (
       return t;
     };
 
+    const parseRequired = (part) => {};
+
+    const parseOptional = (part) => {};
+
+    const parseZeroOrMore = (part) => {};
+
+    const parseOneOrMore = (part) => {};
+
     const tryParseRulePart = (part) => {
       let field = part.field;
       let value = null;
 
+      // handle simple required rule
       if (part.required === "yes") {
+        value = parseRequired(part);
+      }
+
+      // handle ?
+      if (part.required === "?") {
+        value = parseOptional(part);
+      }
+
+      // handle *
+      if (part.required === "*") {
+        value = parseZeroOrMore(part);
+      }
+
+      // handle +
+      if (part.required === "+") {
+        value = parseOneOrMore(part);
       }
 
       return [field, value];
@@ -219,9 +244,7 @@ export const createParser = (
     };
 
     const parseExpression = (bp = 0) => {
-      const isRule = token.name in dispatchRules;
-
-      if (isRule) {
+      if (token.name in dispatchRules) {
         console.log(token.name);
         return tryParse(token.name);
       }
