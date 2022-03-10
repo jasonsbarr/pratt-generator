@@ -21,9 +21,6 @@ export const createParser = (
   const terms = [];
   const assigns = [];
   const assoc = { NONE: 0, LEFT: 0, RIGHT: 1 };
-  const nuds = [];
-  const leds = [];
-  const odes = [];
   const nud = {};
   const led = {};
   const ode = {};
@@ -65,11 +62,16 @@ export const createParser = (
       }
       return -1;
     };
-    const isNud = (name) => nuds.includes(name);
-    const isLed = (name) => leds.includes(name);
-    const isOde = (name) => odes.includes(name);
+    const isNud = (name) => name in nud;
+    const isLed = (name) => name in led;
+    const isOde = (name) => name in ode;
 
-    const isValidSymbol = (name) => [...nuds, ...leds, ...odes].includes(name);
+    const isValidSymbol = (name) =>
+      [
+        ...Object.keys(nuds),
+        ...Object.keys(leds),
+        ...Object.keys(odes),
+      ].includes(name);
 
     const binop = (name, bp, tokAssoc) => (left) => ({
       type: "BinaryOp",
@@ -151,13 +153,73 @@ export const createParser = (
       return t;
     };
 
-    const parseRequired = (part) => {};
+    const isGroup = (name) => name.startsWith("[");
 
-    const parseOptional = (part) => {};
+    const parseRequired = ({ terminal, rule }) => {
+      if (terminal) {
+        return eat(rule);
+      }
 
-    const parseZeroOrMore = (part) => {};
+      return tryParse(rule);
+    };
 
-    const parseOneOrMore = (part) => {};
+    const parseZeroOrOne = ({ terminal, rule }) => {
+      if (terminal) {
+        if (match(rule)) {
+          return eat(rule);
+        }
+        return null;
+      }
+
+      return tryParse(rule);
+    };
+
+    const parseZeroOrMore = ({ terminal, rule }) => {
+      let exp = null;
+      if (terminal) {
+        if (match(rule)) {
+          exp = [eat(rule)];
+
+          while (seqOps.includes(token.name)) {
+            token = next();
+            exp.push(eat(rule));
+          }
+        }
+      }
+
+      try {
+        exp = [tryParse(rule)];
+
+        while (seqOps.includes(token.name)) {
+          exp.push(tryParse(rule));
+        }
+      } catch (e) {
+        // zero occurrences of the rule is fine in this case
+      }
+
+      return exp;
+    };
+
+    const parseOneOrMore = ({ terminal, rule }) => {
+      let exp = [];
+
+      if (terminal) {
+        exp.push(eat(rule));
+
+        while (seqOps.includes(token.name)) {
+          exp.push(eat(rule));
+        }
+      }
+
+      // in this case, zero occurrences is not ok so let error go unhandled
+      exp.push(tryParse(rule));
+
+      while (seqOps.includes(token.name)) {
+        exp.push(tryParse(rule));
+      }
+
+      return exp;
+    };
 
     const tryParseRulePart = (part) => {
       let field = part.field;
@@ -170,7 +232,7 @@ export const createParser = (
 
       // handle ?
       if (part.required === "?") {
-        value = parseOptional(part);
+        value = parseZeroOrOne(part);
       }
 
       // handle *
@@ -288,18 +350,6 @@ export const createParser = (
        */
       if (op.type === "oper") {
         // Create expression rules for the operator
-        if (op.nToken) {
-          nuds.push(op.nToken);
-        }
-
-        if (op.lToken) {
-          leds.push(op.lToken);
-        }
-
-        if (op.oToken) {
-          odes.push(op.oToken);
-        }
-
         /**
          * 0-arity operations, e.g. literals
          */
@@ -438,7 +488,7 @@ export const createParser = (
       }
 
       /**
-       * Separaters for operation sequences
+       * Separators for operation sequences
        */
       if (op.type === "sequence") {
         // add the token name to the sequence operators array
