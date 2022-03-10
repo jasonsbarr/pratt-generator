@@ -191,7 +191,7 @@ const operators = [
   },
   {
     type: "oper",
-    id: null,
+    id: "parentheses",
     nToken: "LPAREN",
     lToken: null,
     oToken: "RPAREN",
@@ -302,7 +302,7 @@ const operators = [
 
 const rules = `
 # function definition
-# note that params:expr will also parse a comma-separated sequence of exprs
+# note that params:identifier will also parse a comma-separated sequence of identifiers
 functionDef DEF name:IDENT LPAREN params:identifier RPAREN stat+ END
 `;
 
