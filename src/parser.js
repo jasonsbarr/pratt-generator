@@ -136,9 +136,9 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const parseOde = (left) => ode[token.type](left);
 
     const parseExpr = (rbp = 0) => {
-      let hasLToken = hasLed(token.type);
-      let hasOToken = hasOde(token.type);
-      let opId = getOpId(token.type);
+      let hasLToken = hasLed(token?.type);
+      let hasOToken = hasOde(token?.type);
+      let opId = getOpId(token?.type);
       let left = parseAtom();
       let prec = getPrec(token?.type, "lToken");
       let parsedLed = false;
