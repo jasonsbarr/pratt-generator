@@ -369,7 +369,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
               children: [parseExpression(op.prec)],
             });
             led[op.lToken] = (expr) => {
-              while (token.type === op.lToken) {
+              while (token.type !== op.oToken) {
                 token = next();
                 expr.children.push(parseExpression(op.prec));
               }
