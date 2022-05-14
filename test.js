@@ -16,26 +16,26 @@ const keywords = [
 ];
 
 const lexRules = keywords
-  .map((k) => rule("Keyword", k.toUpperCase(), k))
+  .map((k) => rule(k.toUpperCase(), k))
   .concat([
-    rule("WS", "WS", String.raw`\s+`),
-    rule("Number", "NUMBER", String.raw`\d+`),
-    rule("String", "STRING", String.raw`"(?:\\.|[^\\"])*"?`),
-    rule("Symbol", "ARROW", String.raw`->`),
-    rule("Symbol", "INC", String.raw`\+\+`),
-    rule("Symbol", "PLUS", String.raw`\+`),
-    rule("Symbol", "MINUS", String.raw`-`),
-    rule("Symbol", "EXP", String.raw`\*\*`),
-    rule("Symbol", "MUL", String.raw`\*`),
-    rule("Symbol", "DIV", String.raw`/`),
-    rule("Punc", "DOT", String.raw`\.`),
-    rule("Punc", "LPAREN", String.raw`\(`),
-    rule("Punc", "RPAREN", String.raw`\)`),
-    rule("Punc", "LBRACK", String.raw`\[`),
-    rule("Punc", "RBRACK", String.raw`\]`),
-    rule("Punc", "COMMA", String.raw`,`),
-    rule("Symbol", "ASSIGN", String.raw`=`),
-    rule("Symbol", "IDENT", String.raw`[a-zA-Z_][\w]*`),
+    rule("WS", String.raw`\s+`),
+    rule("NUMBER", String.raw`\d+`),
+    rule("STRING", String.raw`"(?:\\.|[^\\"])*"?`),
+    rule("ARROW", String.raw`->`),
+    rule("INC", String.raw`\+\+`),
+    rule("PLUS", String.raw`\+`),
+    rule("MINUS", String.raw`-`),
+    rule("EXP", String.raw`\*\*`),
+    rule("MUL", String.raw`\*`),
+    rule("DIV", String.raw`/`),
+    rule("DOT", String.raw`\.`),
+    rule("LPAREN", String.raw`\(`),
+    rule("RPAREN", String.raw`\)`),
+    rule("LBRACK", String.raw`\[`),
+    rule("RBRACK", String.raw`\]`),
+    rule("COMMA", String.raw`,`),
+    rule("ASSIGN", String.raw`=`),
+    rule("IDENT", String.raw`[a-zA-Z_][\w]*`),
   ]);
 
 const lex = lexer(lexRules);
@@ -303,3 +303,5 @@ const operators = [
 const parser = createParser(operators);
 
 export const parse = (input) => parser(tokenize(input));
+
+console.log(parse(`1 + 1`));
