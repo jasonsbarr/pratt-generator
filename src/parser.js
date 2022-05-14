@@ -99,23 +99,23 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
       return led[t.name](left);
     };
 
-    const parseOde = (left) => ode[token.name](left);
+    const parseOde = (left) => ode[token.type](left);
 
     const parseExpr = (rbp = 0) => {
       let left = parseAtom();
-      let prec = getPrec(token.name, "lToken");
+      let prec = getPrec(token.type, "lToken");
 
       while (rbp < prec) {
         left = parseLed(left);
-        prec = getPrec(token.name, "lToken");
+        prec = getPrec(token.type, "lToken");
 
-        if (isOde(token.name)) {
+        if (isOde(token.type)) {
           left = parseOde(left);
-          prec = getPrec(token.name, "lToken");
+          prec = getPrec(token.type, "lToken");
         }
       }
 
-      if (isOde(token.name)) {
+      if (isOde(token.type)) {
         left = parseOde(left);
       }
 
@@ -137,20 +137,20 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const parseExpression = (bp = 0) => {
       let exp = parseExpr(bp);
 
-      if (seqOps.includes(token.name)) {
+      if (seqOps.includes(token.type)) {
         exp = [exp];
 
-        while (seqOps.includes(token.name)) {
+        while (seqOps.includes(token.type)) {
           token = next();
           exp.push(parseExpr(0));
         }
 
-        if (isOde(token.name)) {
+        if (isOde(token.type)) {
           exp = parseOde(exp);
         }
       }
 
-      if (assigns.includes(token.name)) {
+      if (assigns.includes(token.type)) {
         exp = parseAssign(exp);
       }
 
@@ -191,7 +191,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
 
           if (op.affix === "MATCHFIX") {
             nud[op.nToken] = () =>
-              token.name === op.oToken
+              token.type === op.oToken
                 ? op.id
                   ? { type: op.id, value: null }
                   : fail("EMPTY UNARY MATCHFIX OPERATOR", token.line, token.col)
@@ -249,7 +249,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
               type: op.id,
               first: left,
               second:
-                token.name === op.oToken ? null : parseExpression(op.prec),
+                token.type === op.oToken ? null : parseExpression(op.prec),
             });
 
             ode[op.oToken] = (expr) => {
@@ -299,6 +299,21 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
               token = next();
               return expr;
             };
+          }
+        }
+
+        /**
+         * Ops with variable arity
+         */
+        if (op.arity === "VARIABLE") {
+          if (op.affix === "MATCHFIX") {
+            // Operation will have an opening and closing token
+            // as well as a separator, which is the led token
+            nud[op.nToken] = () => ({
+              type: op.id,
+              children: [parseExpression(op.prec)],
+            });
+            led[op.lToken] = (expr) => {};
           }
         }
       }
