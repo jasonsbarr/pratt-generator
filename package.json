@@ -1,6 +1,6 @@
 {
   "name": "@jasonsbarr/pratt-generator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A table-driven Pratt expression parser generator",
   "main": "index.js",
