@@ -48,7 +48,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
      * Get the precedence of an operation. Call like getPrec("MINUS", "lToken")
      */
     const getPrec = (token, den) => {
-      for (let op of Object.values(operators)) {
+      for (let op of Object.values(ops)) {
         if (token === op[den]) {
           return op.prec;
         }
@@ -60,7 +60,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const isOde = (name) => name in ode;
 
     const hasLed = (tokenType) => {
-      for (let op of Object.values(operators)) {
+      for (let op of Object.values(ops)) {
         if (tokenType === op.nToken && op.lToken) {
           return true;
         }
@@ -69,7 +69,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     };
 
     const hasOde = (tokenType) => {
-      for (let op of Object.values(operators)) {
+      for (let op of Object.values(ops)) {
         if (tokenType === op.nToken || tokenType === op.lToken) {
           if (op.oToken) {
             return true;
@@ -80,7 +80,7 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     };
 
     const getOpId = (tokenType) => {
-      for (let op of Object.values(operators)) {
+      for (let op of Object.values(ops)) {
         if (
           tokenType === op.nToken ||
           tokenType === op.lToken ||
@@ -120,17 +120,17 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
       let t = token;
       token = next();
 
-      if (!isNud(t.name)) {
-        fail(t.name, t.line, t.col);
+      if (!isNud(t.type)) {
+        fail(t.type, t.line, t.col);
       }
 
-      return nud[t.name](t);
+      return nud[t.type](t);
     };
 
     const parseLed = (left) => {
       let t = token;
       token = next();
-      return led[t.name](left);
+      return led[t.type](left);
     };
 
     const parseOde = (left) => ode[token.type](left);
@@ -140,24 +140,24 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
       let hasOToken = hasOde(token.type);
       let opId = getOpId(token.type);
       let left = parseAtom();
-      let prec = getPrec(token.type, "lToken");
+      let prec = getPrec(token?.type, "lToken");
       let parsedLed = false;
       let parsedOde = false;
 
       while (rbp < prec) {
         left = parseLed(left);
         parsedLed = true;
-        hasOToken = hasOde(token.type);
-        prec = getPrec(token.type, "lToken");
+        hasOToken = hasOde(token?.type);
+        prec = getPrec(token?.type, "lToken");
 
-        if (isOde(token.type)) {
+        if (isOde(token?.type)) {
           left = parseOde(left);
           parsedOde = true;
-          prec = getPrec(token.type, "lToken");
+          prec = getPrec(token?.type, "lToken");
         }
       }
 
-      if (isOde(token.type)) {
+      if (isOde(token?.type)) {
         left = parseOde(left);
         parsedOde = true;
       }
@@ -192,20 +192,20 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const parseExpression = (bp = 0) => {
       let exp = parseExpr(bp);
 
-      if (seqOps.includes(token.type)) {
+      if (seqOps.includes(token?.type)) {
         exp = [exp];
 
-        while (seqOps.includes(token.type)) {
+        while (seqOps.includes(token?.type)) {
           token = next();
           exp.push(parseExpr(0));
         }
 
-        if (isOde(token.type)) {
+        if (isOde(token?.type)) {
           exp = parseOde(exp);
         }
       }
 
-      if (assigns.includes(token.type)) {
+      if (assigns.includes(token?.type)) {
         exp = parseAssign(exp);
       }
 
