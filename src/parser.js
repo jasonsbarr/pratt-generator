@@ -141,176 +141,7 @@ export const createParser = (
       };
     };
 
-    const match = (name) => token.name === name;
-
-    const eat = (name) => {
-      if (token.name !== name) {
-        fail(token.name, token.line, token.col);
-      }
-
-      let t = token;
-      token = next();
-      return t;
-    };
-
-    const isGroup = (name) => name.startsWith("[");
-
-    const parseRequired = ({ terminal, rule }) => {
-      if (terminal) {
-        return eat(rule);
-      }
-
-      return tryParse(rule);
-    };
-
-    const parseZeroOrOne = ({ terminal, rule }) => {
-      if (terminal) {
-        if (match(rule)) {
-          return eat(rule);
-        }
-        return null;
-      }
-
-      return tryParse(rule);
-    };
-
-    const parseZeroOrMore = ({ terminal, rule }) => {
-      let exp = null;
-      if (terminal) {
-        if (match(rule)) {
-          exp = [eat(rule)];
-
-          while (seqOps.includes(token.name)) {
-            token = next();
-            exp.push(eat(rule));
-          }
-        }
-      }
-
-      try {
-        exp = [tryParse(rule)];
-
-        while (seqOps.includes(token.name)) {
-          exp.push(tryParse(rule));
-        }
-      } catch (e) {
-        // zero occurrences of the rule is fine in this case
-      }
-
-      return exp;
-    };
-
-    const parseOneOrMore = ({ terminal, rule }) => {
-      let exp = [];
-
-      if (terminal) {
-        exp.push(eat(rule));
-
-        while (seqOps.includes(token.name)) {
-          exp.push(eat(rule));
-        }
-      }
-
-      // in this case, zero occurrences is not ok so let error go unhandled
-      exp.push(tryParse(rule));
-
-      while (seqOps.includes(token.name)) {
-        exp.push(tryParse(rule));
-      }
-
-      return exp;
-    };
-
-    const tryParseRulePart = (part) => {
-      let field = part.field;
-      let value = null;
-
-      // handle simple required rule
-      if (part.required === "yes") {
-        value = parseRequired(part);
-      }
-
-      // handle ?
-      if (part.required === "?") {
-        value = parseZeroOrOne(part);
-      }
-
-      // handle *
-      if (part.required === "*") {
-        value = parseZeroOrMore(part);
-      }
-
-      // handle +
-      if (part.required === "+") {
-        value = parseOneOrMore(part);
-      }
-
-      return [field, value];
-    };
-
-    const tryParseRule = (rule) => {
-      console.log(rule);
-      let parsed;
-      for (let part of rule) {
-        try {
-          let [field, value] = tryParseRulePart(part);
-          if (field) {
-            parsed = parsed ? { ...parsed } : {};
-            parsed[field] = value;
-          }
-        } catch (e) {
-          return null;
-        }
-      }
-      return parsed;
-    };
-
-    const tryParse = (name) => {
-      let p = pos;
-      // first, see if there's a token name dispatcher for {name}
-      let options = dispatchRules[name] ? dispatchRules[name] : [];
-
-      for (let opt of options) {
-        let exp = tryParseRule(pRules[opt]);
-
-        if (exp) {
-          return exp;
-        }
-
-        // rewind the token stream to try the next option
-        pos = p;
-        token = tokens[pos];
-      }
-
-      // if no named token dispatcher matched, see if the name matches a parse rule
-      if (name in pRules) {
-        exp = tryParseRule(pRules[name]);
-        if (exp) {
-          return exp;
-        }
-      }
-
-      // rewind the token stream to try parsing an operation
-      pos = p;
-      token = tokens[pos];
-
-      // if no parse rule matched, see if the name is a named operation
-      if (name in ops) {
-        return parseExpression();
-      }
-
-      // no rule matched - error
-      throw new Error(
-        `No matching rule found for token ${token.name} at ${token.line}:${token.col}`
-      );
-    };
-
     const parseExpression = (bp = 0) => {
-      if (token.name in dispatchRules) {
-        console.log(token.name);
-        return tryParse(token.name);
-      }
-
       let exp = parseExpr(bp);
 
       if (seqOps.includes(token.name)) {
@@ -331,14 +162,6 @@ export const createParser = (
       }
 
       return exp;
-    };
-
-    const parseToplevel = () => {
-      // if (!isValidSymbol(token.name)) {
-      //   fail(token.name, token.line, token.col);
-      // }
-
-      return parseExpression();
     };
 
     // generate parser
@@ -510,25 +333,6 @@ export const createParser = (
       }
     }
 
-    /**
-     * Parse rules, if any
-     */
-    if (rules) {
-      pRules = parseRules(rules);
-
-      // Create dispatch table on initial tokens
-      for (let [name, rule] of Object.entries(pRules)) {
-        let rulesSet = [];
-        if (rule[0].terminal) {
-          dispatchRules[rule[0].rule] = dispatchRules[rule[0].rule]
-            ? [...dispatchRules[rule[0].rule], name]
-            : [name];
-
-          rulesSet.push(name);
-        }
-      }
-    }
-
-    return parseToplevel();
+    return parseExpression();
   };
 };
