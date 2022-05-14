@@ -300,12 +300,6 @@ const operators = [
   },
 ];
 
-const rules = `
-# function definition
-# note that params:identifier will also parse a comma-separated sequence of identifiers
-functionDef DEF name:IDENT LPAREN params:identifier RPAREN stat+ END
-`;
-
-const parser = createParser(operators, { rules });
+const parser = createParser(operators);
 
 export const parse = (input) => parser(tokenize(input));

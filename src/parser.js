@@ -1,5 +1,3 @@
-import { parseRules } from "./rule_parser.js";
-
 class ParseError extends Error {
   constructor(name, line, col) {
     super(`Unexpected token type ${name} at ${line}:${col}`);
@@ -10,13 +8,8 @@ const fail = (name, line, col) => {
   throw new ParseError(name, line, col);
 };
 
-export const createParser = (
-  operators,
-  { assignPrec = 5, eoi = "ENDOFINPUT", rules = null } = {}
-) => {
+export const createParser = (operators, { assignPrec = 5 } = {}) => {
   const ops = {};
-  let pRules = {};
-  let dispatchRules = {};
   const seqOps = [];
   const terms = [];
   const assigns = [];
