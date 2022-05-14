@@ -59,6 +59,40 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const isLed = (name) => name in led;
     const isOde = (name) => name in ode;
 
+    const hasLed = (tokenType) => {
+      for (let op of Object.values(operators)) {
+        if (tokenType === op.nToken && op.lToken) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const hasOde = (tokenType) => {
+      for (let op of Object.values(operators)) {
+        if (tokenType === op.nToken || tokenType === op.lToken) {
+          if (op.oToken) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    const getOpId = (tokenType) => {
+      for (let op of Object.values(operators)) {
+        if (
+          tokenType === op.nToken ||
+          tokenType === op.lToken ||
+          tokenType === op.oToken
+        ) {
+          return op.id;
+        }
+      }
+
+      throw new Error(`Unknown operation for token type ${tokenType}`);
+    };
+
     const isValidSymbol = (name) =>
       [
         ...Object.keys(nuds),
@@ -102,21 +136,42 @@ export const createParser = (operators, { assignPrec = 5 } = {}) => {
     const parseOde = (left) => ode[token.type](left);
 
     const parseExpr = (rbp = 0) => {
+      let hasLToken = hasLed(token.type);
+      let hasOToken = hasOde(token.type);
+      let opId = getOpId(token.type);
       let left = parseAtom();
       let prec = getPrec(token.type, "lToken");
+      let parsedLed = false;
+      let parsedOde = false;
 
       while (rbp < prec) {
         left = parseLed(left);
+        parsedLed = true;
+        hasOToken = hasOde(token.type);
         prec = getPrec(token.type, "lToken");
 
         if (isOde(token.type)) {
           left = parseOde(left);
+          parsedOde = true;
           prec = getPrec(token.type, "lToken");
         }
       }
 
       if (isOde(token.type)) {
         left = parseOde(left);
+        parsedOde = true;
+      }
+
+      if (hasLToken && !parsedLed) {
+        throw new Error(
+          `Expected token type ${operators[opId].lToken} for operation ${opId}; got ${token.type}`
+        );
+      }
+
+      if (hasOToken && !parsedOde) {
+        throw new Error(
+          `Expected token type ${operators[opId].oToken} for operation ${opId}; got ${token.type}`
+        );
       }
 
       return left;
